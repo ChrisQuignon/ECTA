@@ -60,6 +60,9 @@ docs/_build/
 
 
 ##LATEX (from https://github.com/github/gitignore/blob/master/TeX.gitignore)
+
+.tex.swp
+
 # Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

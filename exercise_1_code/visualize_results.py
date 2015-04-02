@@ -38,7 +38,7 @@ CURRENT_GENERATION = 0
 
 class Canvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100, nD = 2):
-        plt.xkcd()
+        #plt.xkcd()
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         FigureCanvas.__init__(self, self.fig)
         self.dim = nD
@@ -326,4 +326,3 @@ class EAVApplicationWindow(QtGui.QMainWindow):
     def export_jpg(self):
         self.canvas_fitscape.export_jpg()
         self.statusBar().showMessage("JPG exported", 2000)
-
