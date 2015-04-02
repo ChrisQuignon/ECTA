@@ -1,0 +1,104 @@
+%\documentclass{beamer}
+%\usetheme{Pittsburgh} 
+\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{default}
+\usepackage[procnames]{listings}
+\usepackage{graphicx}
+%\usepackage[toc,page]{appendix}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{color}
+
+%Python
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{0,0,113}
+\definecolor{red}{RGB}{160,0,0}
+\definecolor{green}{RGB}{0,150,0}
+\lstset{language=Python,
+basicstyle=\ttfamily\scriptsize,
+keywordstyle=\color{keywords},
+commentstyle=\color{comments},
+stringstyle=\color{red},
+identifierstyle=\color{green},
+procnamekeys={def,class},
+breaklines=true,
+columns=fullflexible,
+%Numbering and Tabs
+%numbers=left,
+%tabsize=4,
+%showspaces=false,
+%showstringspaces=false
+}
+
+
+%Bibliogrpahy?
+%\usepackage{bibentry}
+%\nobibliography*
+%\bibentry{ }
+
+
+\begin{document}
+
+\title{Execise 01}
+\subtitle{ Evolutionary Computation Theory and Application}
+\author{
+  Quignon, Christophe \\
+  %Familyname, Name
+} 
+\date{\today}
+
+
+\maketitle
+
+\section{Implement three algorithms}
+\subsection{Basic Steepest Descent}
+\subsection{Steepest Descent with momentum}
+\subsection{Newton’s Method}
+\subsubsection{Square error}
+\subsubsection{Trimodal fitness function}
+\subsubsection{3D Plateau fitness function}
+
+\section{Analysis}:
+\subsection{SD: 10 equidistant starting positions and 10 learning rates}
+\subsection{MSD: 10 equidistant starting positions, 10 learning rates, 10 momenta}
+\subsection{NM: use as a reference, one run for all 10 equidistant starting positions
+as used in SD/MSD}
+\subsubsection{(with systematic sampling of starting positions)}
+\subsubsection{Error curves and time to convergence graphs}
+\subsubsection{Heat maps for SD and MSD}
+\subsection{Line graph representing min/mean/max fitness over iterations}
+\subsection{Text explanations of result}
+
+
+%CONTENTS
+%NOTES
+
+
+%COPY AND PASTE FROM HERE
+
+%\begin{enumerate}
+% \item 
+%\end{enumerate}
+
+%\hyperref{link}{text}
+
+%\begin{lstlisting}[language=Python]
+%#PYTHON CODE HERE
+%\end{lstlisting}
+
+%\lstinputlisting[Language=Python]{ }
+
+%\begin{figure}
+% \center
+% \includegraphics[width= cm]{ }
+% \caption{}
+%\end{figure}
+
+%BIBLIOGRPAHY?
+\bibliographystyle{plain}%amsalpha
+\bibliography{Top30.bib}
+%\bibentry{}
+
+\end{document}
