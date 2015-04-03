@@ -192,4 +192,3 @@ class Triangle2D(FitnessLandscape):
             return 0
         else:
             return float('NaN')
-

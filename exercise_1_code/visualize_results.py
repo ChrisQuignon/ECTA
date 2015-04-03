@@ -90,6 +90,7 @@ class FitnessCanvas(Canvas):
         self.l2, = self.axes.plot(self.x, meanfit, 'b')
         self.axes.hold(False)
 
+
     def update_figure(self):
         self.timer.setInterval(1000/FRAMERATE)
         changed = False
@@ -245,7 +246,8 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_sliders.setLayout(self.hBoxLayout)
 
         # Add fitness canvas
-        #canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
+        #TODO: maybe undo comment
+        canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
 
         # Add fitness landscape and individuals
         self.dim = dim
@@ -262,7 +264,8 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.hBoxLayout_nav.addWidget(self.toolbar)
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
-        #l.addWidget(canvas_fit)
+        #TODO: maybe undo comment
+        l.addWidget(canvas_fit)
         l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
         l.addWidget(self.frame_sliders)

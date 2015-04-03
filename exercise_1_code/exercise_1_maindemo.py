@@ -41,16 +41,16 @@ def main():
     #fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATION
-    # optimizer = optimization.HillClimber2DLAB(
-    #                                             fitness_function = fitness_function,
-    #                                             precision = precision,
-    #                                             stepsize = stepsize,
-    #                                             max_iterations = max_iterations,
-    #                                             path = optimizer_output_path,
-    #                                             individuals_data = individuals_data,
-    #                                             fitness_statistics = fitness_statistics
-                                                # starting_position = -0.6,
-    #                                             )
+    optimizer = optimization.HillClimber2DLAB(
+                                                fitness_function = fitness_function,
+                                                precision = precision,
+                                                stepsize = stepsize,
+                                                max_iterations = max_iterations,
+                                                path = optimizer_output_path,
+                                                individuals_data = individuals_data,
+                                                fitness_statistics = fitness_statistics,
+                                                starting_position = -1.6
+                                                )
 
     # optimizer = optimization.steepestDescent(
     #                                             fitness_function = fitness_function,
@@ -65,18 +65,20 @@ def main():
     #                                             inertia = 0.8# no inertia means no momentum
     #                                             )
 
-    optimizer = optimization.newtonMethod(
-                                                fitness_function = fitness_function,
-                                                precision = precision,
-                                                max_iterations = max_iterations,
-                                                path = optimizer_output_path,
-                                                individuals_data = individuals_data,
-                                                fitness_statistics = fitness_statistics,
-                                                starting_position = -0.6,
-                                                )
+    # optimizer = optimization.newtonMethod(
+    #                                             fitness_function = fitness_function,
+    #                                             precision = precision,
+    #                                             max_iterations = max_iterations,
+    #                                             path = optimizer_output_path,
+    #                                             individuals_data = individuals_data,
+    #                                             fitness_statistics = fitness_statistics,
+    #                                             starting_position = -0.6,
+    #                                             )
 
     # RUN OPTIMIZATION
     optimizer.run()
+
+
 
     # VISUALIZATION
     aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,

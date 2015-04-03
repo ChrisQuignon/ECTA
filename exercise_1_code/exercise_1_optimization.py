@@ -10,6 +10,7 @@ import shutil
 import glob
 
 import math
+import numpy as np
 
 import numpy
 import fitness_factory
@@ -29,6 +30,9 @@ class Optimization():
         self.individuals_data = self.path + individuals_data
         helpers.empty_file(self.individuals_data)
         self.fitness_statistics = self.path + fitness_statistics
+        helpers.empty_file(self.fitness_statistics)
+
+
         logging.info("Optimization\tinitialized")
         pass
 
@@ -60,6 +64,9 @@ class HillClimber2DLAB(Optimization):
         self.current_iteration = 0
         self.position = starting_position
 
+        self.maxfit = float('nan')
+        self.meanfit = 0.0
+
     def step(self):
         self.current_iteration = self.current_iteration + 1
 
@@ -72,6 +79,20 @@ class HillClimber2DLAB(Optimization):
         elif middle <= right and left <= right:
             self.position = self.position + self.stepsize
 
+
+        #Fitness values
+        i = self.current_iteration
+        fitness = self.ff.get_point_fitness(self.position)
+        self.maxfit = max(fitness, self.maxfit)
+
+        if i > 2:
+            self.meanfit = self.meanfit * (i-1)/i + fitness * 1 / i
+        else:
+            self.meanfit = fitness
+
+        #TODO: check for higher dimensionality
+        #self.ff.get_dimensionality
+
     def stop(self):
         if self.current_iteration >= self.max_iterations:
             return True
@@ -83,6 +104,9 @@ class HillClimber2DLAB(Optimization):
         # Export to file (append)
         helpers.append_file(self.individuals_data, data)
 
+        # # Stack fitness statistics
+        data = numpy.vstack((self.maxfit, self.meanfit))
+        helpers.append_file(self.fitness_statistics, data)
 
 class steepestDescent(Optimization):
     def __init__(self, starting_position = 0.0, learning_rate = 0.1, inertia = float('nan'), *args, **kwargs):
@@ -107,6 +131,9 @@ class steepestDescent(Optimization):
 
         self.position = steepest_descent + self.momentum
 
+        #TODO: check for higher dimensionality
+        #self.ff.get_dimensionality
+
     def stop(self):
         if self.current_iteration >= self.max_iterations:
             return True
@@ -129,8 +156,6 @@ class newtonMethod(Optimization):
 
     def step(self):
         self.current_iteration = self.current_iteration + 1
-
-        #TODO: Code
         self.position = self.position - self.ff.get_point_gradient(self.position) / self.ff.get_point_second_gradient(self.position)
 
     def stop(self):
