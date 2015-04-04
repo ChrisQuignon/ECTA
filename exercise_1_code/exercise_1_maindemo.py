@@ -35,35 +35,35 @@ def main():
 
     # SETUP FITNESS FUNCTION
     fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
-    #fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
+    #itness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
     #TODO: Fix error
     #fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATION
-    optimizer = optimization.HillClimber2DLAB(
-                                                fitness_function = fitness_function,
-                                                precision = precision,
-                                                stepsize = stepsize,
-                                                max_iterations = max_iterations,
-                                                path = optimizer_output_path,
-                                                individuals_data = individuals_data,
-                                                fitness_statistics = fitness_statistics,
-                                                starting_position = -1.6
-                                                )
-
-    # optimizer = optimization.steepestDescent(
+    # optimizer = optimization.HillClimber2DLAB(
     #                                             fitness_function = fitness_function,
     #                                             precision = precision,
+    #                                             stepsize = stepsize,
     #                                             max_iterations = max_iterations,
     #                                             path = optimizer_output_path,
     #                                             individuals_data = individuals_data,
     #                                             fitness_statistics = fitness_statistics,
-    #
-    #                                             starting_position = -0.6,
-    #                                             learning_rate = 0.1,
-    #                                             inertia = 0.8# no inertia means no momentum
+    #                                             starting_position = -1.6
     #                                             )
+
+    optimizer = optimization.steepestDescent(
+                                                fitness_function = fitness_function,
+                                                precision = precision,
+                                                max_iterations = max_iterations,
+                                                path = optimizer_output_path,
+                                                individuals_data = individuals_data,
+                                                fitness_statistics = fitness_statistics,
+                                                starting_position = -0.6,
+
+                                                learning_rate = 0.1,
+                                                inertia = 0.8# no inertia means no momentum
+                                                )
 
     # optimizer = optimization.newtonMethod(
     #                                             fitness_function = fitness_function,

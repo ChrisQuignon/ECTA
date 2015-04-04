@@ -166,7 +166,14 @@ class FitnessLandScapeCanvas(Canvas):
 
 class FitnessLandScapeCanvas2D(FitnessLandScapeCanvas):
     def produce_scatter(self):
-        self.scatter = self.axes.scatter(self.individuals_data[[2*CURRENT_GENERATION],:], self.individuals_data[[2*CURRENT_GENERATION+1],:], c='r', marker='o', zorder = 4, s=50)
+        self.scatter = self.axes.plot(self.individuals_data[[2*CURRENT_GENERATION],:][0],
+                                            self.individuals_data[[2*CURRENT_GENERATION+1][0],:],
+                                            color='red',
+                                            marker='x',
+                                            zorder = 10,
+                                            #s=50,
+                                            linestyle = '-',
+                                            )
         self.axes.hold(True)
         best_individual = np.argmax(self.individuals_data[[2*CURRENT_GENERATION+1],:])
         self.scatter_best = self.axes.scatter(self.individuals_data[[2*CURRENT_GENERATION],best_individual], self.individuals_data[[2*CURRENT_GENERATION+1],best_individual], c='g', marker='o', zorder = 4, s=120)
@@ -223,7 +230,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.label_sld_generation = QtGui.QLabel("Maximum generation displayed")
         self.label_current_generation = QtGui.QLabel(str(CURRENT_GENERATION))
 
-        # self.sld_generation = QtGui.QSlider(0, max_iterations, 1, 0, QtCore.Qt.Horizontal, self)
+        #self.sld_generation = QtGui.QSlider(0, max_iterations, 1, 0, QtCore.Qt.Horizontal, self)
         self.sld_generation = QtGui.QSlider(QtCore.Qt.Horizontal, self)
         self.sld_generation.setMinimum(0)
         self.sld_generation.setMaximum(self.max_iterations)
@@ -251,7 +258,6 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_sliders.setLayout(self.hBoxLayout)
 
         # Add fitness canvas
-        #TODO: maybe undo comment
         canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
 
         # Add fitness landscape and individuals
@@ -269,7 +275,6 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.hBoxLayout_nav.addWidget(self.toolbar)
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
-        #TODO: maybe undo comment
         l.addWidget(canvas_fit)
         l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
