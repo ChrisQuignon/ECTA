@@ -4,7 +4,8 @@
 from visualize_results  import *
 import fitness_factory
 import exercise_1_optimization as optimization
-from numpy import arange
+from numpy import arange, linspace
+from os import rename
 
 def main():
     qApp = QtGui.QApplication(sys.argv)
@@ -32,15 +33,95 @@ def main():
     learning_rate = 0.1
     precision = 0.0001
 
+    def analysis():
+        optimizers = [optimization.HillClimber2DLAB, optimization.SteepestDescent, optimization.NewtonMethod]
+        fitness_functions = [fitness_factory.SquaredError2D, fitness_factory.Trimodal2D]
+        #fitness_functions.append(fitness_factory.Plateau3D)
 
-    # SETUP FITNESS FUNCTION
+        for optimizer_name in optimizers:
+            for fitness_function_name in fitness_functions:
+                fitness_function = fitness_function_name(ranges = ranges)
+
+                for starting_position in linspace(min_val + stepsize, max_val - stepsize, 10):
+
+                    if optimizer_name.__name__ == "SteepestDescent":
+                        for learning_rate in linspace(0, 1, 10):
+                            for inertia in linspace(0, 1, 10):
+                                optimizer = optimizer_name(
+                                                        fitness_function = fitness_function,
+                                                        precision = precision,
+                                                        max_iterations = max_iterations,
+                                                        path = optimizer_output_path,
+                                                        individuals_data = individuals_data,
+                                                        fitness_statistics = fitness_statistics,
+                                                        starting_position = starting_position,
+                                                        learning_rate = learning_rate,
+                                                        inertia = inertia)
+                                optimizer.run()
+
+                                aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                                                          fitstat_data=optimizer_output_path + fitness_statistics,
+                                                          fitscape_data=fitness_function.get_fitness_filename(),
+                                                          ranges=ranges, max_iterations=optimizer.get_current_iteration(),
+                                                          width=width, height=height, dpi=dpi,
+                                                          dim=fitness_function.get_dimensionality())
+                                aw.export_jpg()
+
+                                # fname = "/images/"
+                                fname = optimizer_name.__name__
+                                fname = fname + "_" + fitness_function_name.__name__
+                                fname = fname +  "_" + str("%.2f" % round(starting_position,2))
+                                fname = fname +  "_" + str("%.2f" % round(learning_rate,2))
+                                fname = fname +  "_" + str("%.2f" % round(inertia,2))
+                                # fname = fname + ".jpg"
+
+                                print fname
+
+                                rename("export.jpg", "output/images/" + fname + "_steps")
+                                rename("export_fitness.jpg", "output/images/" + fname + "_fitness")
+                    else:
+
+                        optimizer = optimizer_name(
+                                                fitness_function = fitness_function,
+                                                precision = precision,
+                                                max_iterations = max_iterations,
+                                                path = optimizer_output_path,
+                                                individuals_data = individuals_data,
+                                                fitness_statistics = fitness_statistics,
+                                                starting_position = starting_position)
+                        optimizer.run()
+
+                        aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                                                  fitstat_data=optimizer_output_path + fitness_statistics,
+                                                  fitscape_data=fitness_function.get_fitness_filename(),
+                                                  ranges=ranges, max_iterations=optimizer.get_current_iteration(),
+                                                  width=width, height=height, dpi=dpi,
+                                                  dim=fitness_function.get_dimensionality())
+                        aw.export_jpg()
+
+                        #fname = "/images/"
+                        fname = optimizer_name.__name__
+                        fname = fname + "_" + fitness_function_name.__name__
+                        fname = fname +  "_" + str("%.2f" % round(starting_position,2))
+                        # fname = fname + ".jpg"
+
+                        print fname
+
+                        rename("export.jpg", "output/images/" + fname + "_steps")
+                        rename("export_fitness.jpg", "output/images/" + fname + "_fitness")
+
+    #ANALYSIS RUN
+    #analysis()
+
+    #TEST
+    # SETUP FITNESS FUNCTIONs
     fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
-    #itness_function = fitness_factory.Trimodal2D(ranges = ranges)
+    # fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
     #TODO: Fix error
     #fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
-    # SETUP OPTIMIZATION
+    # SETUP OPTIMIZATIONS
     # optimizer = optimization.HillClimber2DLAB(
     #                                             fitness_function = fitness_function,
     #                                             precision = precision,
@@ -52,17 +133,17 @@ def main():
     #                                             starting_position = -1.6
     #                                             )
 
-    optimizer = optimization.steepestDescent(
+    optimizer = optimization.SteepestDescent(
                                                 fitness_function = fitness_function,
                                                 precision = precision,
                                                 max_iterations = max_iterations,
                                                 path = optimizer_output_path,
                                                 individuals_data = individuals_data,
                                                 fitness_statistics = fitness_statistics,
-                                                starting_position = -0.6,
+                                                starting_position = 1.9,
 
-                                                learning_rate = 0.1,
-                                                inertia = 0.8# no inertia means no momentum
+                                                learning_rate = 0.56,
+                                                inertia = 0.5# no inertia means no momentum
                                                 )
 
     # optimizer = optimization.newtonMethod(
@@ -89,6 +170,8 @@ def main():
                               dim=fitness_function.get_dimensionality())
 
     aw.show()
+
+    aw.export_jpg()
 
     sys.exit(qApp.exec_())
 

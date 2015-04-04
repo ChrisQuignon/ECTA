@@ -116,6 +116,14 @@ class FitnessCanvas(Canvas):
             self.l3, = self.axes.plot(self.x, minfit, 'b')
             self.axes.hold(False)
 
+    def export_pdf(self):
+        fname='export_fitness.pdf'
+        self.fig.savefig(fname)
+
+    def export_jpg(self):
+        fname='export_fitness.jpg'
+        self.fig.savefig(fname)
+
 class FitnessLandScapeCanvas(Canvas):
     global FRAMERATE
     global CURRENT_GENERATION
@@ -258,7 +266,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_sliders.setLayout(self.hBoxLayout)
 
         # Add fitness canvas
-        canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
+        self.canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
 
         # Add fitness landscape and individuals
         self.dim = dim
@@ -275,7 +283,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.hBoxLayout_nav.addWidget(self.toolbar)
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
-        l.addWidget(canvas_fit)
+        l.addWidget(self.canvas_fit)
         #l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
         #l.addWidget(self.frame_sliders)
@@ -333,9 +341,11 @@ class EAVApplicationWindow(QtGui.QMainWindow):
 )
 
     def export_pdf(self):
+        self.canvas_fit.export_pdf()
         self.canvas_fitscape.export_pdf()
         self.statusBar().showMessage("PDF exported", 2000)
 
     def export_jpg(self):
+        self.canvas_fit.export_jpg()
         self.canvas_fitscape.export_jpg()
         self.statusBar().showMessage("JPG exported", 2000)

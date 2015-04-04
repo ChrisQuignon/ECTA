@@ -118,7 +118,7 @@ class HillClimber2DLAB(Optimization):
     # def export_step(self):
     #     pass
 
-class steepestDescent(Optimization):
+class SteepestDescent(Optimization):
     def __init__(self, learning_rate = 0.1, inertia = float('nan'), *args, **kwargs):
         # Construct superclass
         Optimization.__init__(self, *args, **kwargs)
@@ -150,7 +150,7 @@ class steepestDescent(Optimization):
     #     pass
 
 
-class newtonMethod(Optimization):
+class NewtonMethod(Optimization):
     def __init__(self, *args, **kwargs):
         # Construct superclass
         Optimization.__init__(self, *args, **kwargs)
