@@ -35,6 +35,7 @@ class Optimization():
         self.current_iteration = 0
         self.position = starting_position
 
+        self.old_position = float('nan')
         self.maxfit = float('nan')
         self.minfit = float('nan')
         self.meanfit = float('nan')
@@ -47,6 +48,11 @@ class Optimization():
         pass
 
     def stop(self):
+        #precision is met
+        if math.fabs(self.old_position - self.position)<self.precision:
+            return True
+
+        #max iterations are met
         if self.current_iteration >= self.max_iterations:
             return True
         return False
@@ -92,6 +98,7 @@ class HillClimber2DLAB(Optimization):
 
     def step(self):
         self.current_iteration = self.current_iteration + 1
+        self.old_position = self.position
 
         left = self.ff.get_point_fitness(self.position - self.stepsize)
         middle = self.ff.get_point_fitness(self.position)
@@ -122,6 +129,7 @@ class steepestDescent(Optimization):
 
     def step(self):
         self.current_iteration = self.current_iteration + 1
+        self.old_position = self.position
 
         delta = self.ff.get_point_fitness(self.position)
         steepest_descent = -1.0 * self.learning_rate * delta
@@ -150,6 +158,8 @@ class newtonMethod(Optimization):
 
     def step(self):
         self.current_iteration = self.current_iteration + 1
+        self.old_position = self.position
+
         self.position = self.position - self.ff.get_point_gradient(self.position) / self.ff.get_point_second_gradient(self.position)
 
     # def stop(self):

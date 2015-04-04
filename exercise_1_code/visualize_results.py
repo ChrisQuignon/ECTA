@@ -276,9 +276,9 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
         l.addWidget(canvas_fit)
-        l.addWidget(self.frame_nav)
+        #l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
-        l.addWidget(self.frame_sliders)
+        #l.addWidget(self.frame_sliders)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
