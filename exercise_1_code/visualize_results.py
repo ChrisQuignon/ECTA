@@ -85,9 +85,12 @@ class FitnessCanvas(Canvas):
         self.x = np.arange(0., len(self.fitness_data[0]), 1.)
         maxfit = x = np.array(map(float, self.fitness_data[0]))
         meanfit = x = np.array(map(float, self.fitness_data[1]))
+        minfit = x = np.array(map(float, self.fitness_data[2]))
         self.l1, = self.axes.plot(self.x, maxfit, 'r')
         self.axes.hold(True)
-        self.l2, = self.axes.plot(self.x, meanfit, 'b')
+        self.l2, = self.axes.plot(self.x, meanfit, 'g')
+        self.axes.hold(True)
+        self.l3, = self.axes.plot(self.x, minfit, 'b')
         self.axes.hold(False)
 
 
@@ -105,11 +108,13 @@ class FitnessCanvas(Canvas):
             self.x = np.arange(0., len(self.fitness_data[0]), 1.)
             maxfit = x = np.array(map(float, self.fitness_data[0]))
             meanfit = x = np.array(map(float, self.fitness_data[1]))
+            minfit = x = np.array(map(float, self.fitness_data[2]))
             self.l1, = self.axes.plot(self.x, maxfit, 'r')
             self.axes.hold(True)
-            self.l2, = self.axes.plot(self.x, meanfit, 'b')
+            self.l2, = self.axes.plot(self.x, meanfit, 'g')
+            self.axes.hold(True)
+            self.l3, = self.axes.plot(self.x, minfit, 'b')
             self.axes.hold(False)
-            self.draw()
 
 class FitnessLandScapeCanvas(Canvas):
     global FRAMERATE

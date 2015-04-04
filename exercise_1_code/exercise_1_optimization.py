@@ -65,6 +65,7 @@ class HillClimber2DLAB(Optimization):
         self.position = starting_position
 
         self.maxfit = float('nan')
+        self.minfit = float('nan')
         self.meanfit = 0.0
 
     def step(self):
@@ -84,6 +85,7 @@ class HillClimber2DLAB(Optimization):
         i = self.current_iteration
         fitness = self.ff.get_point_fitness(self.position)
         self.maxfit = max(fitness, self.maxfit)
+        self.minfit = min(fitness, self.minfit)
 
         if i > 2:
             self.meanfit = self.meanfit * (i-1)/i + fitness * 1 / i
@@ -105,7 +107,7 @@ class HillClimber2DLAB(Optimization):
         helpers.append_file(self.individuals_data, data)
 
         # # Stack fitness statistics
-        data = numpy.vstack((self.maxfit, self.meanfit))
+        data = numpy.vstack((self.maxfit, self.meanfit, self.minfit))
         helpers.append_file(self.fitness_statistics, data)
 
 class steepestDescent(Optimization):
