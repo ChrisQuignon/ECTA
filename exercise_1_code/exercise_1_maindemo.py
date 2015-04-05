@@ -13,8 +13,8 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     # Window configuration
-    width = 8
-    height = 10
+    width = 16
+    height = 20
     dpi = 100
 
     # Data file and path definitions

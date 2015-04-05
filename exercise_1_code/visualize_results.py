@@ -47,7 +47,10 @@ class Canvas(FigureCanvas):
             pass
         else:
             self.axes = self.fig.add_subplot(1, 1, 1, projection='3d')
-            pass
+
+            #Rotate
+            self.axes.view_init(90, 90)
+
         self.axes.hold(False)
         self.compute_initial_figure()
         self.setParent(parent)
@@ -55,6 +58,12 @@ class Canvas(FigureCanvas):
                                    QtGui.QSizePolicy.Expanding,
                                    QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
+        #canvas Ticks
+        start, end = self.axes.get_xlim()
+        self.axes.xaxis.set_ticks(np.arange(start, end, 1.0))
+        start, end = self.axes.get_ylim()
+        self.axes.yaxis.set_ticks(np.arange(start, end, 1.0))
 
     def compute_initial_figure(self):
         pass
@@ -220,7 +229,7 @@ class FitnessLandScapeCanvas3D(FitnessLandScapeCanvas):
 
     def produce_landscape(self):
         self.x, self.y = np.meshgrid(self.ranges, self.ranges)
-        surf = self.axes.plot_surface(self.x, self.y, self.fitscape, rstride=1, cstride=1, cmap=cm.jet, alpha=0.2, zorder = 10)
+        surf = self.axes.plot_surface(self.x, self.y, self.fitscape, rstride=1, cstride=1, cmap=cm.jet, alpha=0.4, zorder = 10)
         self.axes.set_axisbelow(True)
         self.axes.hold(True)
         self.axes.mouse_init()
@@ -288,6 +297,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         # Add fitness canvas
         self.canvas_fit = FitnessCanvas(data=str(fitstat_data), parent=self.main_widget, width=width, height=height, dpi=dpi, nD = 2)
 
+
         # Add fitness landscape and individuals
         self.dim = dim
         if dim is 3:
@@ -304,7 +314,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
         l.addWidget(self.canvas_fit)
-        l.addWidget(self.frame_nav)
+        #l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
         #l.addWidget(self.frame_sliders)
 
