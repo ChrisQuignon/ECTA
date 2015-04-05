@@ -21,6 +21,9 @@ def write_file(thefile, thedata):
 
 def append_file(thefile, thedata):
     olddata = read_file(thefile)
+
+
+
     with open(thefile, 'wb') as file_handle:
         if olddata is False:
             thedata.dump(file_handle)

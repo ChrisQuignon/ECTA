@@ -193,14 +193,34 @@ class FitnessLandScapeCanvas2D(FitnessLandScapeCanvas):
 
 class FitnessLandScapeCanvas3D(FitnessLandScapeCanvas):
     def produce_scatter(self):
-        self.scatter = self.axes.scatter(self.individuals_data[CURRENT_GENERATION, 0::3], self.individuals_data[CURRENT_GENERATION, 1::3], self.individuals_data[CURRENT_GENERATION, 2::3], c='r', marker='o', zorder = 4, s=50)
+
+        x= self.individuals_data[0]
+        y =  self.individuals_data[1]
+        z =  self.individuals_data[2]
+
+        # pass
+        # x = self.individuals_data[CURRENT_GENERATION, 0::3]
+        # y = self.individuals_data[CURRENT_GENERATION, 0::2]
+        # z = self.individuals_data[CURRENT_GENERATION, 0::1]
+        #
+        # print "XXX"
+        # print x
+        # print y
+        # print z
+
+        # print x
+        # print y
+        # print z
+
+
+        self.scatter = self.axes.scatter(x, y, z, c='r', marker='o', zorder = 4, s=50)
         self.axes.hold(True)
-        best_individual = np.argmax(self.individuals_data[CURRENT_GENERATION,2::3])
-        self.scatter_best = self.axes.scatter(self.individuals_data[CURRENT_GENERATION,best_individual*3], self.individuals_data[CURRENT_GENERATION,best_individual*3+1], self.individuals_data[CURRENT_GENERATION,best_individual*3+2], c='g', marker='o', s=120, zorder = 5)
+        best_individual = np.argmax(z)
+        self.scatter_best = self.axes.scatter(x[best_individual], y[best_individual], z[best_individual], c='g', marker='o', s=120, zorder = 5)
 
     def produce_landscape(self):
         self.x, self.y = np.meshgrid(self.ranges, self.ranges)
-        surf = self.axes.plot_surface(self.x, self.y, self.fitscape, rstride=1, cstride=1, cmap=cm.coolwarm, alpha=0.2, zorder = 10)
+        surf = self.axes.plot_surface(self.x, self.y, self.fitscape, rstride=1, cstride=1, cmap=cm.jet, alpha=0.2, zorder = 10)
         self.axes.set_axisbelow(True)
         self.axes.hold(True)
         self.axes.mouse_init()
@@ -284,7 +304,7 @@ class EAVApplicationWindow(QtGui.QMainWindow):
         self.frame_nav.setLayout(self.hBoxLayout_nav)
 
         l.addWidget(self.canvas_fit)
-        #l.addWidget(self.frame_nav)
+        l.addWidget(self.frame_nav)
         l.addWidget(self.canvas_fitscape)
         #l.addWidget(self.frame_sliders)
 

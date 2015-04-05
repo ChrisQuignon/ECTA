@@ -11,6 +11,7 @@ import glob
 
 import math
 import numpy as np
+from itertools import product
 
 import numpy
 import fitness_factory
@@ -49,7 +50,7 @@ class Optimization():
 
     def stop(self):
         #precision is met
-        if math.fabs(self.old_position - self.position)<self.precision:
+        if np.all(np.absolute(self.old_position - self.position)<self.precision):
             return True
 
         #max iterations are met
@@ -58,6 +59,10 @@ class Optimization():
         return False
 
     def export_step(self):
+
+        # print self.position
+        # print self.ff.get_point_fitness(self.position)
+
 
         #Fitness values
         i = self.current_iteration
@@ -71,11 +76,18 @@ class Optimization():
             self.meanfit = fitness
 
         # Stack current position and its fitness value
-        data = numpy.vstack((self.position, self.ff.get_point_fitness(self.position)))
+        fit = self.ff.get_point_fitness(self.position)
+        data = self.position
+
+        if self.ff.get_dimensionality() > 2:
+            data =  self.position.reshape(2, 1)
+
+        data = numpy.vstack((data, fit))
+
         # Export to file (append)
         helpers.append_file(self.individuals_data, data)
 
-        # # Stack fitness statistics
+        #Stack fitness statistics
         data = numpy.vstack((self.maxfit, self.meanfit, self.minfit))
         helpers.append_file(self.fitness_statistics, data)
 
@@ -100,18 +112,15 @@ class HillClimber2DLAB(Optimization):
         self.current_iteration = self.current_iteration + 1
         self.old_position = self.position
 
-        left = self.ff.get_point_fitness(self.position - self.stepsize)
-        middle = self.ff.get_point_fitness(self.position)
-        right = self.ff.get_point_fitness(self.position + self.stepsize)
+        step = self.stepsize
+        dim = self.ff.get_dimensionality()
 
-        if left >= middle and left >= right:
-            self.position = self.position - self.stepsize
-        elif middle <= right and left <= right:
-            self.position = self.position + self.stepsize
+        best_position = (self.position, float('-Infinity'))
 
-        #TODO: check for higher dimensionality
-        #self.ff.get_dimensionality
-
+        for q in product([step, 0.0, -step], repeat = dim-1):
+            p = q + self.position
+            if self.ff.get_point_fitness(p) > self.ff.get_point_fitness(self.position):
+                self.position = p
     # def stop(self):
     #     pass
 
@@ -131,17 +140,17 @@ class SteepestDescent(Optimization):
         self.current_iteration = self.current_iteration + 1
         self.old_position = self.position
 
-        delta = self.ff.get_point_fitness(self.position)
-        steepest_descent = -1.0 * self.learning_rate * delta
+        gradient = self.ff.get_point_gradient(self.position)
 
-        #no inertia means no momentum
-        if not math.isnan(self.inertia):
-            self.momentum = self.inertia * self.momentum
+        gradient = np.asarray(gradient)
+        sd_term = self.learning_rate * gradient
 
-        self.position = steepest_descent + self.momentum
+        self.momentum = self.inertia * self.momentum
 
-        #TODO: check for higher dimensionality
-        #self.ff.get_dimensionality
+        delta = sd_term + self.momentum
+
+        self.position = self.position + delta
+
 
     # def stop(self):
     #     pass

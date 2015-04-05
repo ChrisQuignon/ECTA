@@ -6,6 +6,7 @@ import fitness_factory
 import exercise_1_optimization as optimization
 from numpy import arange, linspace
 from os import rename
+import numpy as np
 
 def main():
     qApp = QtGui.QApplication(sys.argv)
@@ -24,7 +25,7 @@ def main():
     # Ranges (both for fitness landscape visualization as well as optimization boundaries
     min_val = -2
     max_val = 2
-    grid_size = 0.05
+    grid_size = 0.2
     ranges = arange(min_val, max_val, grid_size)
 
     # Optimization parameters
@@ -115,36 +116,38 @@ def main():
 
     #TEST
     # SETUP FITNESS FUNCTIONs
-    fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
+    # fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
     # fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
-    #TODO: Fix error
-    #fitness_function = fitness_factory.Plateau3D(ranges = ranges)
+    # TODO: Fix error
+    fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATIONS
-    # optimizer = optimization.HillClimber2DLAB(
-    #                                             fitness_function = fitness_function,
-    #                                             precision = precision,
-    #                                             stepsize = stepsize,
-    #                                             max_iterations = max_iterations,
-    #                                             path = optimizer_output_path,
-    #                                             individuals_data = individuals_data,
-    #                                             fitness_statistics = fitness_statistics,
-    #                                             starting_position = -1.6
-    #                                             )
-
-    optimizer = optimization.SteepestDescent(
+    optimizer = optimization.HillClimber2DLAB(
                                                 fitness_function = fitness_function,
                                                 precision = precision,
+                                                stepsize = stepsize,
                                                 max_iterations = max_iterations,
                                                 path = optimizer_output_path,
                                                 individuals_data = individuals_data,
                                                 fitness_statistics = fitness_statistics,
-                                                starting_position = 1.9,
-
-                                                learning_rate = 0.56,
-                                                inertia = 0.5# no inertia means no momentum
+                                                starting_position = np.array([0.0, 0.0])
+                                                # starting_position = np.array([1.0])
                                                 )
+
+    # optimizer = optimization.SteepestDescent(
+    #                                             fitness_function = fitness_function,
+    #                                             precision = precision,
+    #                                             max_iterations = max_iterations,
+    #                                             path = optimizer_output_path,
+    #                                             individuals_data = individuals_data,
+    #                                             fitness_statistics = fitness_statistics,
+    #                                             starting_position = np.array([1.0, 0.0]),
+    #                                             # starting_position = np.array([-1.5]),
+    #
+    #                                             learning_rate = 0.1,
+    #                                             inertia = 0.1# no inertia means no momentum
+    #                                             )
 
     # optimizer = optimization.newtonMethod(
     #                                             fitness_function = fitness_function,
