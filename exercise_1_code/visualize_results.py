@@ -60,10 +60,10 @@ class Canvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         #canvas Ticks
-        start, end = self.axes.get_xlim()
-        self.axes.xaxis.set_ticks(np.arange(start, end, 1.0))
-        start, end = self.axes.get_ylim()
-        self.axes.yaxis.set_ticks(np.arange(start, end, 1.0))
+        # start, end = self.axes.get_xlim()
+        # self.axes.xaxis.set_ticks(np.arange(start, end, 1.0))
+        # start, end = self.axes.get_ylim()
+        # self.axes.yaxis.set_ticks(np.arange(start, end, 1.0))
 
     def compute_initial_figure(self):
         pass

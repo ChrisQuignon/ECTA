@@ -13,8 +13,8 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     # Window configuration
-    width = 16
-    height = 20
+    width = 3
+    height = 3
     dpi = 100
 
     # Data file and path definitions
@@ -46,7 +46,7 @@ def main():
                 for starting_position in linspace(min_val + stepsize, max_val - stepsize, 10):
 
                     if optimizer_name.__name__ == "SteepestDescent":
-                        for learning_rate in linspace(0, 1, 10):
+                        for learning_rate in linspace(0.1, 2, 10):
                             for inertia in linspace(0, 1, 10):
                                 optimizer = optimizer_name(
                                                         fitness_function = fitness_function,
@@ -112,42 +112,42 @@ def main():
                         rename("export_fitness.jpg", "output/images/" + fname + "_fitness")
 
     #ANALYSIS RUN
-    #analysis()
+    # analysis()
 
-    #TEST
+    # TEST
     # SETUP FITNESS FUNCTIONs
-    # fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
+    fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
     # fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
     # TODO: Fix error
-    fitness_function = fitness_factory.Plateau3D(ranges = ranges)
+    # fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATIONS
-    optimizer = optimization.HillClimber2DLAB(
-                                                fitness_function = fitness_function,
-                                                precision = precision,
-                                                stepsize = stepsize,
-                                                max_iterations = max_iterations,
-                                                path = optimizer_output_path,
-                                                individuals_data = individuals_data,
-                                                fitness_statistics = fitness_statistics,
-                                                starting_position = np.array([0.0, 0.0])
-                                                # starting_position = np.array([1.0])
-                                                )
-
-    # optimizer = optimization.SteepestDescent(
+    # optimizer = optimization.HillClimber2DLAB(
     #                                             fitness_function = fitness_function,
     #                                             precision = precision,
+    #                                             stepsize = stepsize,
     #                                             max_iterations = max_iterations,
     #                                             path = optimizer_output_path,
     #                                             individuals_data = individuals_data,
     #                                             fitness_statistics = fitness_statistics,
-    #                                             starting_position = np.array([1.0, 0.0]),
-    #                                             # starting_position = np.array([-1.5]),
-    #
-    #                                             learning_rate = 0.1,
-    #                                             inertia = 0.1# no inertia means no momentum
+    #                                             starting_position = np.array([0.0, 0.0])
+    #                                             # starting_position = np.array([1.0])
     #                                             )
+
+    optimizer = optimization.SteepestDescent(
+                                                fitness_function = fitness_function,
+                                                precision = precision,
+                                                max_iterations = max_iterations,
+                                                path = optimizer_output_path,
+                                                individuals_data = individuals_data,
+                                                fitness_statistics = fitness_statistics,
+                                                # starting_position = np.array([1.0, 0.0]),
+                                                starting_position = np.array([1.6]),
+
+                                                learning_rate = 0.1,
+                                                inertia = 0.8# no inertia means no momentum
+                                                )
 
     # optimizer = optimization.newtonMethod(
     #                                             fitness_function = fitness_function,

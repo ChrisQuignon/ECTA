@@ -36,7 +36,7 @@ class Optimization():
         self.current_iteration = 0
         self.position = starting_position
 
-        self.old_position = float('nan')
+        self.old_position = np.array([float('nan')])
         self.maxfit = float('nan')
         self.minfit = float('nan')
         self.meanfit = float('nan')
@@ -128,28 +128,39 @@ class HillClimber2DLAB(Optimization):
     #     pass
 
 class SteepestDescent(Optimization):
-    def __init__(self, learning_rate = 0.1, inertia = float('nan'), *args, **kwargs):
+    def __init__(self, learning_rate = 0.1, inertia = 0.0, *args, **kwargs):
         # Construct superclass
         Optimization.__init__(self, *args, **kwargs)
         self.learning_rate = learning_rate
         self.inertia = inertia
-        self.momentum = 0.0
+
+        #self.momentum = 0.0
+
+        # if self.inertia != float('nan'):
+        #     self.momentum = 1.0
 
 
     def step(self):
         self.current_iteration = self.current_iteration + 1
-        self.old_position = self.position
+
 
         gradient = self.ff.get_point_gradient(self.position)
 
         gradient = np.asarray(gradient)
         sd_term = self.learning_rate * gradient
 
-        self.momentum = self.inertia * self.momentum
+        momentum_term = self.inertia * (self.position - self.old_position)
 
-        delta = sd_term + self.momentum
+        if np.isnan(momentum_term):
+            delta = sd_term
+        else:
+            delta = sd_term + momentum_term
 
+        self.old_position = self.position
         self.position = self.position + delta
+
+
+
 
 
     # def stop(self):
