@@ -183,7 +183,7 @@ def main():
                     rename("export_fitness.jpg", "output/images/" + fname + "_fitness")
 
 
-        # NewtonMethod
+        # # NewtonMethod
         for starting_position in starting_positions_2D:
             for fitness_function_name in [fitness_factory.SquaredError2D, fitness_factory.Trimodal2D]:
                 fitness_function = fitness_function_name(ranges = ranges)
@@ -223,38 +223,37 @@ def main():
 
     # TEST
     # SETUP FITNESS FUNCTIONs
-    # fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
+    fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
     # fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
-
-    fitness_function = fitness_factory.Plateau3D(ranges = ranges)
+    # fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATIONS
-    # optimizer = optimization.HillClimber2DLAB(
-    #                                             fitness_function = fitness_function,
-    #                                             precision = precision,
-    #                                             stepsize = stepsize,
-    #                                             max_iterations = max_iterations,
-    #                                             path = optimizer_output_path,
-    #                                             individuals_data = individuals_data,
-    #                                             fitness_statistics = fitness_statistics,
-    #                                             starting_position = np.array([0.0, 0.0])
-    #                                             # starting_position = np.array([1.0])
-    #                                             )
-
-    optimizer = optimization.SteepestDescent(
+    optimizer = optimization.HillClimber2DLAB(
                                                 fitness_function = fitness_function,
                                                 precision = precision,
+                                                stepsize = stepsize,
                                                 max_iterations = max_iterations,
                                                 path = optimizer_output_path,
                                                 individuals_data = individuals_data,
                                                 fitness_statistics = fitness_statistics,
-                                                starting_position = np.array([0.0, -1.6]),
-                                                # starting_position = np.array([1.0]),
-
-                                                learning_rate = 0.01,
-                                                inertia = 1.0# no inertia means no momentum
+                                                starting_position = np.array([0.0, 0.0])
+                                                # starting_position = np.array([1.0])
                                                 )
+
+    # optimizer = optimization.SteepestDescent(
+    #                                             fitness_function = fitness_function,
+    #                                             precision = precision,
+    #                                             max_iterations = max_iterations,
+    #                                             path = optimizer_output_path,
+    #                                             individuals_data = individuals_data,
+    #                                             fitness_statistics = fitness_statistics,
+    #                                             starting_position = np.array([0.0, -1.6]),
+    #                                             # starting_position = np.array([1.0]),
+    #
+    #                                             learning_rate = 0.01,
+    #                                             inertia = 1.0# no inertia means no momentum
+    #                                             )
 
     # optimizer = optimization.newtonMethod(
     #                                             fitness_function = fitness_function,
