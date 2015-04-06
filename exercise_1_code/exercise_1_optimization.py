@@ -56,13 +56,19 @@ class Optimization():
         #max iterations are met
         if self.current_iteration >= self.max_iterations:
             return True
+
+        #position check
+        if np.any(self.position > 10**10):
+            logging.info("Diverged. Last position: %f", self.position)
+            return True
+
+        if np.any(self.position < -10**10):
+            logging.info("Diverged. Last position: %f", self.position)
+            return True
         return False
 
+
     def export_step(self):
-
-        # print self.position
-        # print self.ff.get_point_fitness(self.position)
-
 
         #Fitness values
         i = self.current_iteration
@@ -133,13 +139,7 @@ class SteepestDescent(Optimization):
         Optimization.__init__(self, *args, **kwargs)
         self.learning_rate = learning_rate
         self.inertia = inertia
-
-        #self.momentum = 0.0
-
-        # if self.inertia != float('nan'):
-        #     self.momentum = 1.0
-
-
+        
     def step(self):
         self.current_iteration = self.current_iteration + 1
 
@@ -147,20 +147,20 @@ class SteepestDescent(Optimization):
         gradient = self.ff.get_point_gradient(self.position)
 
         gradient = np.asarray(gradient)
+
         sd_term = self.learning_rate * gradient
 
-        momentum_term = self.inertia * (self.position - self.old_position)
+        momentum_term = - self.inertia * (self.position - self.old_position)
 
-        if np.isnan(momentum_term):
+        if np.any(np.isnan(momentum_term)):
+            print 'ignore momentum'
             delta = sd_term
         else:
             delta = sd_term + momentum_term
 
+
         self.old_position = self.position
         self.position = self.position + delta
-
-
-
 
 
     # def stop(self):
