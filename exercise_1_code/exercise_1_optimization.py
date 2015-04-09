@@ -139,7 +139,7 @@ class SteepestDescent(Optimization):
         Optimization.__init__(self, *args, **kwargs)
         self.learning_rate = learning_rate
         self.inertia = inertia
-        
+
     def step(self):
         self.current_iteration = self.current_iteration + 1
 

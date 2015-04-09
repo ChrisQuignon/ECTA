@@ -9,6 +9,8 @@ from os import rename
 import numpy as np
 from itertools import product
 
+import my_viz as viz
+
 def main():
     qApp = QtGui.QApplication(sys.argv)
     logging.basicConfig(level=logging.INFO)
@@ -219,14 +221,14 @@ def main():
                         rename("export_fitness.jpg", "output/images/" + fname + "_fitness")
 
     #ANALYSIS RUN
-    new_analysis()
+    # new_analysis()
 
     # TEST
     # SETUP FITNESS FUNCTIONs
-    fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
+    # fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
     # fitness_function = fitness_factory.Trimodal2D(ranges = ranges)
 
-    # fitness_function = fitness_factory.Plateau3D(ranges = ranges)
+    fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     # SETUP OPTIMIZATIONS
     optimizer = optimization.HillClimber2DLAB(
@@ -251,11 +253,11 @@ def main():
     #                                             starting_position = np.array([0.0, -1.6]),
     #                                             # starting_position = np.array([1.0]),
     #
-    #                                             learning_rate = 0.01,
-    #                                             inertia = 1.0# no inertia means no momentum
+    #                                             learning_rate = 0.03,
+    #                                             inertia = 0.40# no inertia means no momentum
     #                                             )
 
-    # optimizer = optimization.newtonMethod(
+    # optimizer = optimization.NewtonMethod(
     #                                             fitness_function = fitness_function,
     #                                             precision = precision,
     #                                             max_iterations = max_iterations,
@@ -271,16 +273,39 @@ def main():
 
 
     # VISUALIZATION
-    aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
-                              fitstat_data=optimizer_output_path + fitness_statistics,
-                              fitscape_data=fitness_function.get_fitness_filename(),
-                              ranges=ranges, max_iterations=optimizer.get_current_iteration(),
-                              width=width, height=height, dpi=dpi,
-                              dim=fitness_function.get_dimensionality())
+    # aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+    #                           fitstat_data=optimizer_output_path + fitness_statistics,
+    #                           fitscape_data=fitness_function.get_fitness_filename(),
+    #                           ranges=ranges, max_iterations=optimizer.get_current_iteration(),
+    #                           width=width, height=height, dpi=dpi,
+    #                           dim=fitness_function.get_dimensionality())
 
-    aw.show()
 
-    aw.export_jpg()
+    #VISUALISATION
+    ##print optimizer.cfg_data_individuals
+    data = helpers.read_file(optimizer_output_path + individuals_data)
+    fitstat = helpers.read_file(optimizer_output_path + fitness_statistics)
+    fitscape = helpers.read_file(fitness_function.get_fitness_filename())
+
+    # print data
+    # print ''
+    # print fitstat
+    # print ''
+    # print fitscape
+    # print '___'
+
+    v = viz.Visualisation()
+    v.add_set(data, fitstat, fitscape, ranges)
+    # v.add_data(data)
+    # v.add_fitstat(fitstat)
+    # v.add_fitscape(fitscape, ranges)
+    v.show()
+
+
+
+    ##aw.show()
+
+    ##aw.export_jpg()
 
     sys.exit(qApp.exec_())
 
