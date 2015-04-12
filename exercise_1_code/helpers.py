@@ -12,7 +12,7 @@ def read_file(thefile):
         try:
             return np.load(file_handle)
         except IOError:
-            logging.info("IO error with file: >" + thefile + "< but continuing")
+            logging.info("IO error but continuing")
             return False
 
 def write_file(thefile, thedata):
@@ -21,16 +21,12 @@ def write_file(thefile, thedata):
 
 def append_file(thefile, thedata):
     olddata = read_file(thefile)
-
-
-
     with open(thefile, 'wb') as file_handle:
         if olddata is False:
             thedata.dump(file_handle)
         else:
-            #TODO: check if axis = 0 is correct
-            #axis = 1 does not flattens the data
-            olddata = np.concatenate((olddata, thedata), axis=1)
+            # olddata = np.concatenate((olddata, thedata), axis=0)
+            olddata = np.vstack((olddata, thedata))
             olddata.dump(file_handle)
 
 def empty_file(thefile):

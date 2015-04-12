@@ -9,13 +9,13 @@ import operator
 import shutil
 import glob
 
-import math
-import numpy as np
-from itertools import product
-
 import numpy
 import fitness_factory
 import helpers
+
+
+import numpy as np
+from itertools import product
 
 class Optimization():
     def __init__(self, fitness_function, precision, path, individuals_data, fitness_statistics, max_iterations, starting_position = 0.0):
@@ -40,7 +40,6 @@ class Optimization():
         self.maxfit = float('nan')
         self.minfit = float('nan')
         self.meanfit = float('nan')
-
 
         logging.info("Optimization\tinitialized")
         pass
@@ -67,9 +66,7 @@ class Optimization():
             return True
         return False
 
-
     def export_step(self):
-
         #Fitness values
         i = self.current_iteration
         fitness = self.ff.get_point_fitness(self.position)
@@ -81,40 +78,46 @@ class Optimization():
         else:
             self.meanfit = fitness
 
-        # Stack current position and its fitness value
+        # # Stack current position and its fitness value
         fit = self.ff.get_point_fitness(self.position)
         data = self.position
 
-        if self.ff.get_dimensionality() > 2:
-            data =  self.position.reshape(2, 1)
+        #weird stuff is weird...
+        if self.ff.get_dimensionality() == 3:
+            data = numpy.append(data, fit)
+        if self.ff.get_dimensionality() == 2:
+            data = numpy.vstack((data, fit))
 
-        data = numpy.vstack((data, fit))
-
-        # Export to file (append)
+        # # Export to file (append)
         helpers.append_file(self.individuals_data, data)
-
-        #Stack fitness statistics
-        data = numpy.vstack((self.maxfit, self.meanfit, self.minfit))
-        helpers.append_file(self.fitness_statistics, data)
+        #
+        # #Stack fitness statistics
+        # data = numpy.vstack((self.maxfit, self.meanfit, self.minfit))
+        # helpers.append_file(self.fitness_statistics, data)
 
     def run(self):
         while not self.stop():
             self.export_step()
             self.step()
         logging.info("Converged")
-        return
+        # print self.maxfit
+        # print self.minfit
+        # print self.meanfit
+        return (self.maxfit, self.minfit, self.meanfit)
 
     def get_current_iteration(self):
         return self.current_iteration
 
 
-class HillClimber2DLAB(Optimization):
+class HillClimber(Optimization):
     def __init__(self, stepsize = 0.1, *args, **kwargs):
         # Construct superclass
         Optimization.__init__(self, *args, **kwargs)
         self.stepsize = stepsize
 
+
     def step(self):
+        # print self.position
         self.current_iteration = self.current_iteration + 1
         self.old_position = self.position
 
@@ -127,11 +130,17 @@ class HillClimber2DLAB(Optimization):
             p = q + self.position
             if self.ff.get_point_fitness(p) > self.ff.get_point_fitness(self.position):
                 self.position = p
+
     # def stop(self):
-    #     pass
+    #     if self.current_iteration >= self.max_iterations:
+    #         return True
+    #     return False
 
     # def export_step(self):
-    #     pass
+    #     # Stack current position and its fitness value
+    #     data = numpy.vstack((self.position, self.ff.get_point_fitness(self.position)))
+    #     # Export to file (append)
+    #     helpers.append_file(self.individuals_data, data)
 
 class SteepestDescent(Optimization):
     def __init__(self, learning_rate = 0.1, inertia = 0.0, *args, **kwargs):
@@ -139,7 +148,7 @@ class SteepestDescent(Optimization):
         Optimization.__init__(self, *args, **kwargs)
         self.learning_rate = learning_rate
         self.inertia = inertia
-        
+
     def step(self):
         self.current_iteration = self.current_iteration + 1
 
@@ -168,7 +177,6 @@ class SteepestDescent(Optimization):
 
     # def export_step(self):
     #     pass
-
 
 class NewtonMethod(Optimization):
     def __init__(self, *args, **kwargs):
