@@ -43,10 +43,8 @@ class Optimization():
         self.meanfit = float('nan')
 
         logging.info("Optimization\tinitialized")
-        pass
 
-    def step(self):
-        pass
+    # def step(self):
 
     def stop(self):
         #precision is met
@@ -146,19 +144,16 @@ class genetic(Optimization):
                     self.pop = np.asarray(individual)
                 else:
                     self.pop = np.vstack((self.pop, individual))
-            pass
 
         def evaluation(self):
             self.pop = sorted(self.pop, key=(lambda p :self.ff.get_point_fitness(p)))
             self.pop.reverse()
             self.position = self.pop[0]
 
-            pass
 
         def selection(self):
             n = int(len(self.pop) * self.select_perc)
             self.pop = self.pop[:n]
-            pass
 
         def crossover(self):
 
@@ -172,7 +167,6 @@ class genetic(Optimization):
 
                     offspring = (parent_a + parent_b)/2.0
                     newpop.append(offspring)
-                pass
 
             elif self.crossover_type == 'fitnessmean':
                 for _ in range(self.pop_size-1):
@@ -184,7 +178,6 @@ class genetic(Optimization):
 
                     offspring = (parent_a * f_a + parent_b * f_a) / (f_a + f_b)
                     newpop.append(offspring)
-                pass
 
             elif self.crossover_type == 'randomweight':
                 for _ in range(self.pop_size-1):
@@ -196,9 +189,8 @@ class genetic(Optimization):
 
                     offspring = (parent_a * f_a + parent_b * f_a) / (f_a + f_b)
                     newpop.append(offspring)
-                pass
 
-            
+
             elif self.crossover_type == 'onepoint':
 
                 for _ in range(self.pop_size-1):
@@ -206,13 +198,20 @@ class genetic(Optimization):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
 
+                    # print parent_a
+                    # print parent_b
+
                     offspring = []
 
                     for i in range(parent_a.size):
                         a_front, a_tail = str(parent_a[i]).split('.')
                         b_front, b_tail = str(parent_b[i]).split('.')
 
-                        offspring.append(float(str(a_front + '.' + b_tail)))
+                        try:
+                            offspring.append(float(str(a_front + '.' + b_tail)))
+                        except ValueError:
+                            print "Not a float: " + str(a_front + '.' + b_tail)
+                            return #pech gehabt...
 
                     newpop.append(np.asarray(offspring))
 
@@ -220,6 +219,9 @@ class genetic(Optimization):
                 for _ in range(self.pop_size-1):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
+
+                    # print parent_a
+                    # print parent_b
 
                     offspring = []
 
@@ -232,7 +234,11 @@ class genetic(Optimization):
                             a_tail = a_tail[:i] + b_tail[i:]
                             b_tail = b_tail[:i] + temp
 
-                        offspring.append(float(str(a_front + '.' + b_tail)))
+                        try:
+                            offspring.append(float(str(a_front + '.' + b_tail)))
+                        except ValueError:
+                            print "Not a float: " + str(a_front + '.' + b_tail)
+                            return #pech gehabt...
 
                     newpop.append(np.asarray(offspring))
 
@@ -243,6 +249,9 @@ class genetic(Optimization):
 
                     offspring = []
 
+                    # print parent_a
+                    # print parent_b
+
                     for i in range(parent_a.size):
                         a_front, a_tail = str(parent_a[i]).split('.')
                         b_front, b_tail = str(parent_b[i]).split('.')
@@ -252,17 +261,20 @@ class genetic(Optimization):
                             a_tail = a_tail[:i] + b_tail[i:]
                             b_tail = b_tail[:i] + temp
 
-                        offspring.append(float(str(a_front + '.' + b_tail)))
+                        try:
+                            offspring.append(float(str(a_front + '.' + b_tail)))
+                        except ValueError:
+                            print "Not a float: " + str(a_front + '.' + b_tail)
+                            return #pech gehabt...
+
 
                     newpop.append(np.asarray(offspring))
-                pass
 
             else:
                 print 'no crossover for type ' +  self.crossover_type
 
             self.pop = newpop
 
-            pass
 
         def mutation(self):
             t = self.crossover_type
@@ -288,7 +300,6 @@ class genetic(Optimization):
                         s = i +r
                         # print 'mutating ', i , ' -> ', s
                         i = s
-            pass
 
 
         def step(self):

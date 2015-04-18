@@ -70,6 +70,10 @@ class Optimization():
         #Fitness values
         i = self.current_iteration
         fitness = self.ff.get_point_fitness(self.position)
+
+        print self.position.shape
+        print fitness
+
         self.maxfit = max(fitness, self.maxfit)
         self.minfit = min(fitness, self.minfit)
 
