@@ -142,14 +142,10 @@ class genetic(Optimization):
                     individual[i] = random() *(_max-_min)+_min
                 individual.reshape(s)
 
-                # print self.pop.size
-                # print individual
-
                 if self.pop.size == 0:
-                    self.pop = individual
+                    self.pop = np.asarray(individual)
                 else:
-                    self.pop = np.append(self.pop, individual, axis=1)
-                # print self.pop.shape
+                    self.pop = np.vstack((self.pop, individual))
             pass
 
         def evaluation(self):
@@ -162,12 +158,6 @@ class genetic(Optimization):
         def selection(self):
             n = int(len(self.pop) * self.select_perc)
             self.pop = self.pop[:n]
-
-            #for every empty spot:
-                #choose parents (beta random with (alpha 1 beta 3))
-                    #crossoverempty spots
-
-            # print 'selecting ', n
             pass
 
         def crossover(self):
@@ -180,7 +170,7 @@ class genetic(Optimization):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
 
-                    offspring = np.mean([parent_a, parent_b])
+                    offspring = (parent_a + parent_b)/2.0
                     newpop.append(offspring)
                 pass
 
@@ -208,6 +198,7 @@ class genetic(Optimization):
                     newpop.append(offspring)
                 pass
 
+            
             elif self.crossover_type == 'onepoint':
 
                 for _ in range(self.pop_size-1):
@@ -215,46 +206,55 @@ class genetic(Optimization):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
 
-                    a_front, a_tail = str(parent_a).split('.')
-                    b_front, b_tail = str(parent_b).split('.')
+                    offspring = []
 
-                    offspring = float(str(a_front + '.' + b_tail))
+                    for i in range(parent_a.size):
+                        a_front, a_tail = str(parent_a[i]).split('.')
+                        b_front, b_tail = str(parent_b[i]).split('.')
 
-                    newpop.append(offspring)
+                        offspring.append(float(str(a_front + '.' + b_tail)))
+
+                    newpop.append(np.asarray(offspring))
 
             elif self.crossover_type == 'twopoint':
                 for _ in range(self.pop_size-1):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
 
-                    a_front, a_tail = str(parent_a).split('.')
-                    b_front, b_tail = str(parent_b).split('.')
+                    offspring = []
 
-                    for i in range(1, 2):
-                        temp = a_tail[i:]
-                        a_tail = a_tail[:i] + b_tail[i:]
-                        b_tail = b_tail[:i] + temp
+                    for i in range(parent_a.size):
+                        a_front, a_tail = str(parent_a[i]).split('.')
+                        b_front, b_tail = str(parent_b[i]).split('.')
 
-                    offspring = float(str(a_front + '.' + b_tail))
+                        for i in range(1, 2):
+                            temp = a_tail[i:]
+                            a_tail = a_tail[:i] + b_tail[i:]
+                            b_tail = b_tail[:i] + temp
 
-                    newpop.append(offspring)
+                        offspring.append(float(str(a_front + '.' + b_tail)))
+
+                    newpop.append(np.asarray(offspring))
 
             elif self.crossover_type == 'threepoint':
                 for _ in range(self.pop_size-1):
                     parent_a = choice(self.pop)
                     parent_b = choice(self.pop)
 
-                    a_front, a_tail = str(parent_a).split('.')
-                    b_front, b_tail = str(parent_b).split('.')
+                    offspring = []
 
-                    for i in range(1, 3):
-                        temp = a_tail[i:]
-                        a_tail = a_tail[:i] + b_tail[i:]
-                        b_tail = b_tail[:i] + temp
+                    for i in range(parent_a.size):
+                        a_front, a_tail = str(parent_a[i]).split('.')
+                        b_front, b_tail = str(parent_b[i]).split('.')
 
-                    offspring = float(str(a_front + '.' + b_tail))
+                        for i in range(1, 3):
+                            temp = a_tail[i:]
+                            a_tail = a_tail[:i] + b_tail[i:]
+                            b_tail = b_tail[:i] + temp
 
-                    newpop.append(offspring)
+                        offspring.append(float(str(a_front + '.' + b_tail)))
+
+                    newpop.append(np.asarray(offspring))
                 pass
 
             else:
@@ -277,7 +277,7 @@ class genetic(Optimization):
                             idx = int(random() * len(s))
                         s = s[:idx] + choice('0123456789') +s[idx+1:]
 
-                        print 'mutating ', i , ' -> ', s
+                        # print 'mutating ', i , ' -> ', s
                         i = np.asarray(s)
             else:
                 for i in self.pop:
@@ -286,7 +286,7 @@ class genetic(Optimization):
 
                         r = random() -0.5
                         s = i +r
-                        print 'mutating ', i , ' -> ', s
+                        # print 'mutating ', i , ' -> ', s
                         i = s
             pass
 
@@ -294,9 +294,9 @@ class genetic(Optimization):
         def step(self):
             # print self.position
             self.current_iteration = self.current_iteration + 1
-            print self.position
+            # print self.position
             # self.pop = sorted(self.pop, key=(lambda p :self.ff.get_point_fitness(p)))
-            print self.pop
+            # print self.pop
 
 
 

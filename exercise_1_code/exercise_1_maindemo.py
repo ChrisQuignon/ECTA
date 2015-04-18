@@ -44,7 +44,7 @@ def main():
         test_vals = np.hstack(([0], logspace(0, 2, 9)/250))
         # test_vals = [0.0]
 
-        for fitness_function_name in [fitness_factory.Plateau3D, fitness_factory.SquaredError2D, fitness_factory.Trimodal2D]:#fitness_factory.SquaredError2D, fitness_factory.Trimodal2D,
+        for fitness_function_name in [fitness_factory., fitness_factory.SquaredError2D, fitness_factory.Trimodal2D]:#fitness_factory.SquaredError2D, fitness_factory.Trimodal2D,
             for optimizer_name in [optimization.HillClimber, optimization.SteepestDescent, optimization.NewtonMethod]:
 
                 #DEFAULT

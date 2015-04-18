@@ -39,7 +39,7 @@ def main():
     ds = []
 
 
-    fitness_function = fitness_factory.SquaredError2D(ranges = ranges)
+    fitness_function = fitness_factory.Plateau3D(ranges = ranges)
 
     crossover_types = ['mean', 'fitnessmean', 'randomweight', 'onepoint', 'onepoint', 'twopoint', 'threepoint']
 
@@ -50,11 +50,11 @@ def main():
                                         path = optimizer_output_path,
                                         individuals_data = individuals_data,
                                         fitness_statistics = fitness_statistics,
-                                        max_iterations = 50,
-                                        starting_position = np.array([-1.0]),
+                                        max_iterations = 20,
+                                        starting_position = np.array([-1.0, 1.0]),
                                         pop_size = 10,
                                         select_perc = 0.8,
-                                        crossover_type = 'randomweight',
+                                        crossover_type = 'threepoint',
                                         mutation_prob = 0.1)
     _max, _min, _mean = optimizer.run()
 
