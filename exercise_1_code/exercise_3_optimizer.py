@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from math import sqrt
 from random import randint, shuffle, random
 
+from multiprocessing import Pool
+
 
 import matplotlib.pyplot as plt
 
@@ -114,29 +116,30 @@ class TSP():
             self.mutation()
             print self.fitness(self.pop[0])
 
-            #PLOT
-
-            plt.ion()
-            plt.show()
-
-            if ((i%int(self.runs/100.0)) ==0):
-                plt.clf()
-                plt.axes().set_aspect(1.5)
-                plt.scatter([c['Long'] for c in self.cities], [c['Lat'] for c in self.cities], c='y', s = 40)
-
-                plot_cities = sort_by(cities, self.pop[0].genotype)
-                plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
-                plt.draw()
-
-        print "ok"
-        plt.clf()
-        plt.axes().set_aspect(1.5)
-        plt.scatter([c['Long'] for c in self.cities], [c['Lat'] for c in self.cities], c='y', s = 40)
-
-        plot_cities = sort_by(cities, self.pop[0].genotype)
-        plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
-        plt.draw()
-        plt.show()
+            # #PLOT
+            # plt.ion()
+            # plt.show()
+            #
+            # if ((i%int(self.runs/100.0)) ==0):
+            #     plt.clf()
+            #     plt.axes().set_aspect(1.5)
+            #     plt.scatter([c['Long'] for c in self.cities], [c['Lat'] for c in self.cities], c='y', s = 40)
+            #
+            #     plot_cities = sort_by(cities, self.pop[0].genotype)
+            #    # plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
+            # plt.fill([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities],fill=False, edgecolor='b')
+            #     plt.draw()
+        self.evaluation()
+        print "DONE"
+        # plt.clf()
+        # plt.axes().set_aspect(1.5)
+        # plt.scatter([c['Long'] for c in self.cities], [c['Lat'] for c in self.cities], c='y', s = 40)
+        #
+        # plot_cities = sort_by(cities, self.pop[0].genotype)
+        # # plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
+        # plt.fill([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities],fill=False, edgecolor='b')
+        # plt.draw()
+        # plt.show()
 
     def evaluation(self):
         # print 'eval'
@@ -151,8 +154,9 @@ class TSP():
 
     def crossover(self):
         # print 'crossover'
-
         new_pop = [self.pop[0]]#elitism
+        #TODO: safe best
+        # self.pop[0].mutation_prob = 0.0#super-elitism
 
         for _ in range(self.pop_size):
             p1 = randint(0, len(self.pop) - 1)
@@ -188,10 +192,32 @@ class TSP():
             last_city = city
         return length
 
+def run_tsp(_):
+    tsp = TSP(cities = cities,
+              runs = 1000,
+              pop_size = 200,
+              select_perc = 0.2,
+              mutation_prob = 0.2)
+    tsp.run()
 
-tsp = TSP(cities = cities,
-          runs = 2000,
-          pop_size = 20,
-          select_perc = 0.8,
-          mutation_prob = 0.2)
-tsp.run()
+
+    plt.clf()
+    plt.axes().set_aspect(1.5)
+    plt.scatter([c['Long'] for c in tsp.cities], [c['Lat'] for c in tsp.cities], c='y', s = 40)
+
+    plot_cities = sort_by(cities, tsp.pop[0].genotype)
+    plt.fill([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities],fill=False, edgecolor='b')
+    # plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
+    plt.draw()
+    # plt.show()
+
+    name = "{0}".format(round(tsp.fitness(tsp.pop[0]), 2)) + '-'
+    name = name + str(tsp.runs) + '-' + str(tsp.pop_size) + '-' + str(tsp.select_perc) + '-' + str(tsp.mutation_prob)
+
+
+    plt.savefig('images/TravellingSalesman/' + name + '.png')
+
+pars = 4
+p = Pool(pars)
+
+(p.map(run_tsp, range(pars)))
