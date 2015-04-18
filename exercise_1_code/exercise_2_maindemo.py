@@ -82,7 +82,7 @@ def main():
         ranges = arange(min_val, max_val, grid_size)
 
         # Optimization parameters
-        max_iterations = 50
+        max_iterations = 30
 
         pop_sizes = [10, 50, 100]# 100 ]#, 1000]
         select_percs = [0.1, 0.5, 1]
@@ -133,7 +133,7 @@ def main():
 
                             fitness_function = fitness_function_name(ranges = ranges)
 
-                            optimizer = optimization.genetic(
+                            optimizer = optimization.Genetic(
                                                                 fitness_function = fitness_function,
                                                                 precision = precision,
                                                                 path = optimizer_output_path,
@@ -147,11 +147,24 @@ def main():
                                                                 mutation_prob = mutation_prob)
                             _max, _min, _mean = optimizer.run()
 
-                            # print fitness_function_name.__name__
-                            # print crossover_types[i]
-                            # print _max
-                            # print _min
-                            # print _mean
+                            aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                                                      fitstat_data=optimizer_output_path + fitness_statistics,
+                                                      fitscape_data=fitness_function.get_fitness_filename(),
+                                                      ranges=ranges,
+                                                      max_iterations=optimizer.get_current_iteration(),
+                                                      width=width, height=height, dpi=dpi,
+                                                      dim=fitness_function.get_dimensionality())
+                            aw.export_jpg()
+
+                            fname = optimizer.__class__.__name__ + "/" + fitness_function_name.__name__
+                            fname = fname +  "_" + str(pop_size)
+                            fname = fname +  "_" + str(select_perc)
+                            fname = fname +  "_" + str(mutation_prob)
+                            fname = fname +  "_" + crossover_types[i]
+                            print fname
+
+                            rename("export.jpg", "output/images/" + fname)
+
 
                             ds.append({
                                         'min':float(_min),

@@ -109,7 +109,7 @@ class Optimization():
         return self.current_iteration
 
 
-class genetic(Optimization):
+class Genetic(Optimization):
         def __init__(self, pop_size, select_perc, crossover_type, mutation_prob, *args, **kwargs):
             # Construct superclass
             Optimization.__init__(self, *args, **kwargs)
