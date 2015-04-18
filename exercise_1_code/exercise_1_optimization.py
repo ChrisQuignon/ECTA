@@ -103,7 +103,7 @@ class Optimization():
         # print self.maxfit
         # print self.minfit
         # print self.meanfit
-        return (self.maxfit, self.minfit, self.meanfit)
+        return (np.array([self.maxfit]), np.array([self.minfit]), np.array([self.meanfit]))
 
     def get_current_iteration(self):
         return self.current_iteration

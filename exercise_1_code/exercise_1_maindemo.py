@@ -44,7 +44,7 @@ def main():
         test_vals = np.hstack(([0], logspace(0, 2, 9)/250))
         # test_vals = [0.0]
 
-        for fitness_function_name in [fitness_factory.Plateau3D]:#fitness_factory.SquaredError2D, fitness_factory.Trimodal2D,
+        for fitness_function_name in [fitness_factory.Plateau3D, fitness_factory.SquaredError2D, fitness_factory.Trimodal2D]:#fitness_factory.SquaredError2D, fitness_factory.Trimodal2D,
             for optimizer_name in [optimization.HillClimber, optimization.SteepestDescent, optimization.NewtonMethod]:
 
                 #DEFAULT
@@ -85,11 +85,14 @@ def main():
                     max_val = 2
                     grid_size = 0.5
                     ranges =  arange(min_val, max_val, grid_size)
-                    # starting_positions =  product(linspace(-1.0, 1.0, 3), repeat=2)
+                    starting_positions = linspace(min_val + stepsize, max_val - stepsize, 10)
+                    starting_positions =  product(starting_positions, repeat=2)
+                    starting_positions = [np.asarray(val) for val in starting_positions]
                     n = 10
 
-                    starting_positions = [(math.cos(2*pi/n*x),math.sin(2*pi/n*x)) for x in xrange(0,n)]
-                    starting_positions = [np.asarray(x) for x in starting_positions]
+                    #not a circle
+                    # starting_positions = [(math.cos(2*pi/n*x),math.sin(2*pi/n*x)) for x in xrange(0,n)]
+                    # starting_positions = [np.asarray(x) for x in starting_positions]
 
                 fitness_function = fitness_function_name(ranges = ranges)
 
@@ -106,23 +109,23 @@ def main():
 
                         _max, _min, _mean =  optimizer.run()
 
-                        aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
-                                                  fitstat_data=optimizer_output_path + fitness_statistics,
-                                                  fitscape_data=fitness_function.get_fitness_filename(),
-                                                  ranges=ranges,
-                                                  max_iterations=optimizer.get_current_iteration(),
-                                                  width=width, height=height, dpi=dpi,
-                                                  dim=fitness_function.get_dimensionality())
-                        aw.export_jpg()
-
-                        fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
-                        fname = fname +  "_" + array_str(around(sp, 2))
-                        print fname
-
-                        rename("export.jpg", "output/images/" + fname)
+                        # aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                        #                           fitstat_data=optimizer_output_path + fitness_statistics,
+                        #                           fitscape_data=fitness_function.get_fitness_filename(),
+                        #                           ranges=ranges,
+                        #                           max_iterations=optimizer.get_current_iteration(),
+                        #                           width=width, height=height, dpi=dpi,
+                        #                           dim=fitness_function.get_dimensionality())
+                        # aw.export_jpg()
+                        #
+                        # fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
+                        # fname = fname +  "_" + array_str(around(sp, 2))
+                        # print fname
+                        #
+                        # rename("export.jpg", "output/images/" + fname)
 
                         ds.append({
-                                    'min':_max.astype(float),
+                                    'min':_min.astype(float),
                                     'mean':_mean.astype(float),
                                     'max':_max.astype(float),
                                     'ff':fitness_function_name.__name__,
@@ -149,25 +152,25 @@ def main():
                                 _max, _min, _mean =  optimizer.run()
 
 
-                                aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
-                                                          fitstat_data=optimizer_output_path + fitness_statistics,
-                                                          fitscape_data=fitness_function.get_fitness_filename(),
-                                                          ranges=ranges,
-                                                          max_iterations=optimizer.get_current_iteration(),
-                                                          width=width, height=height, dpi=dpi,
-                                                          dim=fitness_function.get_dimensionality())
-                                aw.export_jpg()
-
-                                fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
-                                fname = fname +  "_" + array_str(around(sp, 2))
-                                fname = fname +  "_" + array_str(around(learning_rate, 2))
-                                fname = fname +  "_" + array_str(around(inertia, 2))
-                                print fname
-
-                                rename("export.jpg", "output/images/" + fname)
+                                # aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                                #                           fitstat_data=optimizer_output_path + fitness_statistics,
+                                #                           fitscape_data=fitness_function.get_fitness_filename(),
+                                #                           ranges=ranges,
+                                #                           max_iterations=optimizer.get_current_iteration(),
+                                #                           width=width, height=height, dpi=dpi,
+                                #                           dim=fitness_function.get_dimensionality())
+                                # aw.export_jpg()
+                                #
+                                # fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
+                                # fname = fname +  "_" + array_str(around(sp, 2))
+                                # fname = fname +  "_" + array_str(around(learning_rate, 2))
+                                # fname = fname +  "_" + array_str(around(inertia, 2))
+                                # print fname
+                                #
+                                # rename("export.jpg", "output/images/" + fname)
 
                                 ds.append({
-                                            'min':_max.astype(float),
+                                            'min':_min.astype(float),
                                             'mean':_mean.astype(float),
                                             'max':_max.astype(float),
                                             'learning_rate':learning_rate.astype(float),
@@ -190,23 +193,23 @@ def main():
                         _max, _min, _mean =  optimizer.run()
 
 
-                        aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
-                                                  fitstat_data=optimizer_output_path + fitness_statistics,
-                                                  fitscape_data=fitness_function.get_fitness_filename(),
-                                                  ranges=ranges,
-                                                  max_iterations=optimizer.get_current_iteration(),
-                                                  width=width, height=height, dpi=dpi,
-                                                  dim=fitness_function.get_dimensionality())
-                        aw.export_jpg()
-
-                        fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
-                        fname = fname +  "_" + array_str(around(sp, 2))
-                        print fname
-
-                        rename("export.jpg", "output/images/" + fname)
+                        # aw = EAVApplicationWindow(individuals_data=optimizer_output_path + individuals_data,
+                        #                           fitstat_data=optimizer_output_path + fitness_statistics,
+                        #                           fitscape_data=fitness_function.get_fitness_filename(),
+                        #                           ranges=ranges,
+                        #                           max_iterations=optimizer.get_current_iteration(),
+                        #                           width=width, height=height, dpi=dpi,
+                        #                           dim=fitness_function.get_dimensionality())
+                        # aw.export_jpg()
+                        #
+                        # fname = optimizer_name.__name__ + "/" + fitness_function_name.__name__
+                        # fname = fname +  "_" + array_str(around(sp, 2))
+                        # print fname
+                        #
+                        # rename("export.jpg", "output/images/" + fname)
 
                         ds.append({
-                                    'min':_max.astype(float),
+                                    'min':_min.astype(float),
                                     'mean':_mean.astype(float),
                                     'max':_max.astype(float),
                                     'ff':fitness_function_name.__name__,
@@ -218,21 +221,21 @@ def main():
     latest_analysis()
 
     #DATA EXPORT
-    # keys = [
-    #     'min',
-    #     'mean',
-    #     'max',
-    #     'learning_rate',
-    #     'inertia',
-    #     'ff',
-    #     'opt',
-    #     'sp']
-    #
-    # #Export Data into data.csv
-    # with open('data.csv', 'wb') as output_file:
-    #         dict_writer = csv.DictWriter(output_file, keys)
-    #         dict_writer.writeheader()
-    #         dict_writer.writerows(ds)
+    keys = [
+        'min',
+        'mean',
+        'max',
+        'learning_rate',
+        'inertia',
+        'ff',
+        'opt',
+        'sp']
+
+    #Export Data into data.csv
+    with open('data.csv', 'wb') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(ds)
 
     min_val = -2
     max_val = 2
@@ -241,7 +244,7 @@ def main():
     # starting_positions =  product(linspace(-1.0, 1.0, 3), repeat=2)
     n = 10
 
-    starting_positions = [(math.cos(2*pi/n*x),math.sin(2*pi/n*x)) for x in xrange(0,n)]
+    # starting_positions = [(math.cos(2*pi/n*x),math.sin(2*pi/n*x)) for x in xrange(0,n)]
     starting_positions = [(0.81, -0.59)]
     starting_positions = [np.asarray(x) for x in starting_positions]
 
