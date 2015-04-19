@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 from math import sqrt
 from random import randint, shuffle, random
 
+# import multiprocessing
 from multiprocessing import Pool
 
-
 import matplotlib.pyplot as plt
+import csv
 
 
 #read in file - no utf8
@@ -33,6 +34,8 @@ for city in cities:
 #presort
 cities = sorted(cities, key=lambda k: k['Long'])
 
+
+ds = []
 
 
 # print cities
@@ -60,16 +63,11 @@ def sort_by(list, keys):
     return [val for (idx, val) in sorted(zip(keys, list))]
 
 
-runs = 2
-pop_sizes = [10, 50, 100]
-select_percs = [0.1, 0.5, 1]
-mutation_probs = [0.01, 0.1, 0.3]
-
-
 class Genome():
     def __init__(self, size, mutation_prob, genotype = None):
         self.mutation_prob = mutation_prob
         self.size = size
+
         if genotype is None:
             self.genotype = range(self.size)
             shuffle(self.genotype)
@@ -98,23 +96,28 @@ class Genome():
         return Genome(self.size, self.mutation_prob, kid)
 
 class TSP():
-    def __init__(self, cities, runs, pop_size, select_perc, mutation_prob):
+    def __init__(self, cities, iterations, pop_size, select_perc, mutation_prob):
         self.cities = cities
-        self.runs = runs
+        self.iterations = iterations
         self.pop_size = pop_size
         self.select_perc = select_perc
         self.mutation_prob = mutation_prob
+
+        self.mins = []
+        self.maxs = []
+        self.means = []
+        self.best_genotype = []
 
         self.pop = [Genome(len(cities), self.mutation_prob) for _ in range(pop_size)]
 
 
     def run(self):
-        for i in range(self.runs):
+        for i in range(self.iterations):
             self.evaluation()
             self.selection()
             self.crossover()
             self.mutation()
-            print self.fitness(self.pop[0])
+            # print self.fitness(self.pop[0])
 
             # #PLOT
             # plt.ion()
@@ -130,7 +133,7 @@ class TSP():
             # plt.fill([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities],fill=False, edgecolor='b')
             #     plt.draw()
         self.evaluation()
-        print "DONE"
+        # print "DONE"
         # plt.clf()
         # plt.axes().set_aspect(1.5)
         # plt.scatter([c['Long'] for c in self.cities], [c['Lat'] for c in self.cities], c='y', s = 40)
@@ -141,10 +144,23 @@ class TSP():
         # plt.draw()
         # plt.show()
 
+        return self.mins, self.means, self.maxs, self.best_genotype
+
     def evaluation(self):
         # print 'eval'
         # print self.pop
         self.pop.sort(key=lambda x: self.fitness(x))
+
+        #update statistics
+        self.mins.append(self.fitness(self.pop[0]))
+        self.maxs.append(self.fitness(self.pop[-1]))
+        self.means.append(sum([self.fitness(x) for x in self.pop])/len(self.pop))
+
+        if not self.best_genotype:
+            self.best_genotype = self.pop[0].genotype
+        elif self.mins[-1] < min(self.mins):
+            self.best_genotype = self.pop[0].genotype
+
 
     def selection(self):
         # print 'select'
@@ -192,13 +208,57 @@ class TSP():
             last_city = city
         return length
 
-def run_tsp(_):
-    tsp = TSP(cities = cities,
-              runs = 1000,
-              pop_size = 200,
-              select_perc = 0.2,
-              mutation_prob = 0.2)
-    tsp.run()
+def run_tsp(runs, iterations, pop_size, select_perc, mutation_prob):
+    final_min = []
+    final_max = []
+    final_mean = []
+
+
+    name = str(runs) + '-' + str(iterations) + '-' + str(pop_size) + '-' + str(select_perc) + '-' + str(mutation_prob)
+
+    print name
+
+    # pars = 10
+    # p = Pool(pars)
+    # for _ in range(4):# 3*10  = 30 runs
+    #     p.map(run_tsp(runs, 1000, pop_size, select_perc, mutation_prob), range(pars)) #runs 3 minutes
+
+    for i in range(1, runs+1):
+        tsp = TSP(cities = cities,
+                  iterations = iterations,
+                  pop_size = pop_size,
+                  select_perc = select_perc,
+                  mutation_prob = mutation_prob)
+
+        _mins, _means, _maxs, _best_genotype = tsp.run()
+
+        final_min.append(_mins[-1])
+        final_max.append(_maxs[-1])
+        final_mean.append(_means[-1])
+
+        print "run " + str(i) + " of " + str(runs)
+
+        # return final_min, final_max, final_mean
+
+    # print _mins
+    # print _maxs
+    # print _means
+    # print _best_genotype
+
+    name = "{0}".format(round(tsp.fitness(tsp.pop[0]), 2)) + '-' + name
+
+    plt.clf()
+    plt.plot(range(len(_mins)), _mins, c = 'green')
+    plt.plot(range(len(_mins)), _means, c = 'blue')
+    plt.plot(range(len(_mins)), _maxs, c = 'red')
+    plt.title(str(tsp.pop_size) + ' individuals, ' + str(tsp.select_perc) + '% selection ' + str(tsp.mutation_prob) + "% mutation")
+    plt.xlabel("# iteration")
+    plt.ylabel("Fitness in degree Lat/Long (~110km)")
+    plt.ylim(plt.ylim()[0], 300)
+    # plt.ylim(50, 300)
+    # plt.show()
+    plt.draw()
+    plt.savefig('images/TravellingSalesman/' + name + '-fitness.png')
 
 
     plt.clf()
@@ -210,14 +270,70 @@ def run_tsp(_):
     # plt.plot([c['Long'] for c in plot_cities], [c['Lat'] for c in plot_cities], c='b')
     plt.draw()
     # plt.show()
-
-    name = "{0}".format(round(tsp.fitness(tsp.pop[0]), 2)) + '-'
-    name = name + str(tsp.runs) + '-' + str(tsp.pop_size) + '-' + str(tsp.select_perc) + '-' + str(tsp.mutation_prob)
-
-
     plt.savefig('images/TravellingSalesman/' + name + '.png')
 
-pars = 4
-p = Pool(pars)
+    d = {'runs':runs,
+        'iterations':iterations,
+        'pop_size':pop_size,
+        'select_perc':select_perc,
+        'mutation_prob':mutation_prob,
+        'min':np.mean(final_min),
+        'max':np.mean(final_max),
+        'mean':np.mean(final_mean)}
+    return d
 
-(p.map(run_tsp, range(pars)))
+def wrapper(args):
+    runs, iterations, pop_size, select_perc, mutation_prob = args
+    r = run_tsp(runs, iterations, pop_size, select_perc, mutation_prob)
+    return r
+
+def analysis():
+    runs = 30
+    pop_sizes = [10, 100, 200]
+    select_percs = [0.1, 0.2, 0.6]
+    mutation_probs = [0.01, 0.1, 0.3]
+    iterations = 100
+
+
+    # ds = []
+
+    for pop_size in pop_sizes:
+        for select_perc in select_percs:
+            # for mutation_prob in mutation_probs:
+                # run_tsp(runs, 1000, pop_size, select_perc, mutation_prob)
+            args = [(runs, iterations, pop_size, select_perc, x) for x in mutation_probs]
+
+            pars = 4
+            p = Pool(pars)
+            rvals = p.map(wrapper, args) #runs 3 minutes
+            ds.extend(rvals)
+    #
+    # _min, _max, _mean = run_tsp(runs, iterations, pop_size, select_perc, mutation_prob)
+
+analysis()
+
+
+keys = ['runs',
+        'iterations',
+        'pop_size',
+        'select_perc',
+        'mutation_prob',
+        'min',
+        'max',
+        'mean']
+
+with open('data_tsp.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(ds)
+
+
+
+
+
+
+
+# pars = 4
+# p = Pool(pars)
+# for _ in range(21):
+#     (p.map(run_tsp, range(pars))) #runs 3 minutes
