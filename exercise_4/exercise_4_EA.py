@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 #from math import sqrt
-from random import randint, shuffle, random, gauss
+from random import randint, shuffle, random, gauss, choice
 
 # import multiprocessing
 from multiprocessing import Pool
@@ -73,14 +73,16 @@ class Genome():
 
     def mutate(self, sigma):
 
-        #% MAY BE BAD ( uniform distribution, you know...)
+        #exponential grothdouble the number of trackpoints
+        for _ in range(len(self.genotype)):
+            self.add_neutral_tp()
 
+        #modulo (%) MAY BE BAD ( uniform distribution, you know...)
+        #We mutate everything
         new_tps = [gauss(mu[0], sigma)%RANGE for mu in self.genotype]
 
         #the motor command sigma naturally 0.5
         new_mvs = [gauss(x[1], 0.5)%1 for x in self.genotype]#%1
-        # print "mutated:"
-        # print new_tps, new_mvs
         self.set_genotype(zip(new_tps, new_mvs))
 
 
@@ -108,21 +110,22 @@ class Genome():
                 pass #we just append
             run.append(last_mv)
         try:
-            fit =  ft.vehicle_fitness(np.asarray(run))[0]
+            fit =  ft.vehicle_fitness(np.asarray(run))#[0]
         except SystemExit:
             return float('inf')
         return fit
 
 class Evolution():
-    def __init__(self, iterations, pop_size, selection_type):
+    def __init__(self, iterations, selection_type):
         self.iterations = iterations
-        self.pop_size = pop_size
-        self.selection_type = selection_type
 
-        self.pop = []
-        self.sigma = 0.0#does not make sense but works
+        self.selection_type = [c for c in selection_type if not c.isdigit()][0]
+        self.parents, self.offsprings = map(int, selection_type.split(self.selection_type))
 
-        self.sigma_increase = 0.0#0.0 means disabled
+        self.pop = [Genome([(0, 1.0)])]
+        self.sigma = 0.0 #does not make sense but works
+
+        self.sigma_increase = 0.0 #0.0 means disabled
         self.mutations = 1
         self.improvements = 1
 
@@ -131,24 +134,10 @@ class Evolution():
         self.means = []
 
         ##INITIALIZATION
-        for _ in range(pop_size):
-            # g = Genome([(0, 1.0)])# we start with full power
-            g = Genome([(0, 0.0)])# we start with nothing
+        for _ in range(1, self.parents):
+            self.pop.append(Genome([(0, 1.0)]))
 
-            self.pop.append(g)
-
-            while g.fitness() < 0:
-                steps = randint(0, 10)#%10#TODO scale
-                genotype = []
-                for _ in range(steps):
-                    sp = randint(0, RANGE)
-                    mv = random()
-                    genotype.append((sp, mv))
-                g = Genome(genotype)
-                # print genotype
-
-            self.pop.append(g)
-        print "initialisation done"
+        # print "initialisation done"
 
 
     def run(self):
@@ -159,39 +148,43 @@ class Evolution():
             self.selection()
             # self.mutation()
             # mutation happens inside selection
-            # print "select:"
+
             print map(lambda x: x.fitness(), self.pop)
             # print map(lambda x : x.genotype, self.pop)
 
-        print "DONE"
-        print "WINNER"
+
         self.pop[0].remove_neutral_tps()
-        print self.pop[0].genotype
-        print "with"
+        print self.parents, self.selection_type, self.offsprings, 'terminated after ', self.iterations, " iterations:"
+        print 'fitness: '
         print self.pop[0].fitness()
+        print "track:"
+        print self.pop[0].genotype
 
         return# self.mins, self.means, self.maxs, self.best_genotype
 
     def selection(self):
-        #environmental selection
-        #(1+1), (mu, lambda) and (mu + lambda)
-        if '1' in self.selection_type:
-            # print 'one on one!'
-            parent = self.pop[0]
+
+        parents = [self.pop[i] for i in range(self.parents)]
+        kids = []
+
+        for _ in range(self.offsprings):
+            parent = choice(parents)
             kid = copy.deepcopy(self.pop[0])
             kid.mutate(self.sigma)
-            self.pop = [parent, kid]
 
-            self.mutations = self.mutations + 1
+            #we don't care about our kids
+            # while kid.fitness() == float('inf'):
+            #     kid.mutate(self.sigma)
+            #     print "dead kid"
+            kids.append(kid)
 
-            #TODO
-        elif '+' in self.selection_type:
-            print 'plus!'
-            #TODO
-        elif ',' in self.selection_type.contains:
-            print 'comma'
-            #TODO
-        # print "selection done"
+        if self.selection_type == '+':
+            self.pop = parents + kids
+
+        elif self.selection_type == ',':
+            self.pop = kids
+        else:
+            print "selection type unkown!"
 
     def recombination(self):
 
@@ -214,11 +207,6 @@ class Evolution():
             pass
         pass
 
-    # def mutation(self):
-    #     #mutate all the genomes!
-    #     for g in self.pop:
-    #         g.mutate()
-
     def evaluation(self):
 
         #efficient sorting and know whether the min ha schanged
@@ -229,7 +217,7 @@ class Evolution():
 
         #if elemt changed...
         if sort_keys[0] != 0:
-            print "improved!"
+            # print "improved!"
             self.improvements = 1
             self.mutations = 0
 
@@ -237,17 +225,8 @@ class Evolution():
         self.pop = [self.pop[i] for i in sort_keys]
 
 
-        #WHEN TO ADD A TRACKPOINT?
-        if self.mutations > 10:
-            self.pop[0].add_neutral_tp()
-            self.improvements = 1
-            self.mutations = 0
-            print "trackpoint added"
-
-
 
 ea =  Evolution(
                 iterations = 100,
-                pop_size = 1,
-                selection_type = '1+1')
+                selection_type = '4+2')
 ea.run()

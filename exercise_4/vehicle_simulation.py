@@ -8250,12 +8250,12 @@ def step(y,dt,mc) :
 
 def vehicle_fitness(mca) :
     dt=0.5
-    yy=list()
+    # yy=list()
     y = np.array([0,0,0,0])
-    yy.append(y)
+    # yy.append(y)
     while y[1]<8191 :
         idx = np.floor(y[1])
         mc=mca[idx]
         y=step(y,dt,mc)
-        yy.append(y)
-    return y[3],np.array(yy)
+        # yy.append(y)
+    return y[3]#,np.array(yy)
