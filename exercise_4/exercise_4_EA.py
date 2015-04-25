@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from math import sqrt
 from random import randint, shuffle, random, gauss, choice
+from itertools import groupby
 
 # import multiprocessing
 from multiprocessing import Pool
@@ -22,6 +23,21 @@ class Genome():
         self.set_genotype(genotype)
 
     def set_genotype(self, genotype):
+
+        #remove duplicate position
+        gt = genotype
+        gt.sort()
+        genotype = []
+
+        last_pos = -1
+        for pos, mv in gt:
+            if last_pos == pos:
+                pass
+            else:
+                genotype.append((pos, mv))
+            last_pos = pos
+        # genotype = list(k for k,_ in groupby(gt))
+
         if zip(*genotype):
             trackpoints, motor_values = zip(*genotype)
         else:
@@ -79,10 +95,25 @@ class Genome():
 
         #modulo (%) MAY BE BAD ( uniform distribution, you know...)
         #We mutate everything
-        new_tps = [gauss(mu[0], sigma)%RANGE for mu in self.genotype]
+        new_tps = [(gauss(pos[0], sigma)*RANGE/2.0)%RANGE for pos in self.genotype]
 
-        #the motor command sigma naturally 0.5
-        new_mvs = [gauss(x[1], 0.5)%1 for x in self.genotype]#%1
+
+        new_mvs = [gauss(pos[1], sigma/2.0)%1 for pos in self.genotype]#%1
+
+        new_tps = map(int, new_tps)
+        # new_tps = map (lambda a : a%RANGE, new_tps)
+        #
+        # print 'new_tps:'
+        # print new_tps
+        #
+        # print 'new_mvs:'
+        # print new_mvs
+        #
+        # print 'zip:'
+        # print zip(new_tps, new_mvs)
+        #
+        # print ''
+        # print mutate
         self.set_genotype(zip(new_tps, new_mvs))
 
 
@@ -123,9 +154,9 @@ class Evolution():
         self.parents, self.offsprings = map(int, selection_type.split(self.selection_type))
 
         self.pop = [Genome([(0, 1.0)])]
-        self.sigma = 0.0 #does not make sense but works
+        self.sigma = 0.002 #does not make sense but works
 
-        self.sigma_increase = 0.0 #0.0 means disabled
+        self.sigma_increase = 0.1#0.0 means disabled - it just drops to zero anyway
         self.mutations = 1
         self.improvements = 1
 
@@ -149,7 +180,9 @@ class Evolution():
             # self.mutation()
             # mutation happens inside selection
 
-            print map(lambda x: x.fitness(), self.pop)
+            print round(self.improvements/float(self.mutations), 2), 'succ with :', self.sigma
+            # print round(self.improvements/float(self.mutations), 2)
+            # print map(lambda x: x.fitness(), self.pop)
             # print map(lambda x : x.genotype, self.pop)
 
 
@@ -171,6 +204,7 @@ class Evolution():
             parent = choice(parents)
             kid = copy.deepcopy(self.pop[0])
             kid.mutate(self.sigma)
+            self.mutations = self.mutations + 1
 
             #we don't care about our kids
             # while kid.fitness() == float('inf'):
@@ -194,14 +228,12 @@ class Evolution():
 
             if imp_rate > 1/5.0:
                 # simga --
-                self.sigma = self.sigma - self.sigma_increase
-                print "decreased to ", self.sigma
+                self.sigma = self.sigma * (1 + self.sigma_increase)
+                # print "increased to ", self.sigma
             if imp_rate < 1/5.0:
                 #simga ++
-                self.sigma = self.sigma + self.sigma_increase
-                print "increased to ", self.sigma
-
-                # self.pop[-1].genotype.append(self.pop.genotype[-1])
+                self.sigma = self.sigma * (1 - self.sigma_increase)
+                # print "decreased to ", self.sigma
         else:
             #silently skip
             pass
@@ -217,16 +249,23 @@ class Evolution():
 
         #if elemt changed...
         if sort_keys[0] != 0:
-            # print "improved!"
-            self.improvements = 1
-            self.mutations = 0
+            print "improved!"
+        #     self.improvements = self.improvements +1
 
         #we now sort by the index
         self.pop = [self.pop[i] for i in sort_keys]
 
+        self.improvements = 0;
+        for i in self.pop:
+            if i.fitness() != float("inf"):
+                self.improvements = self.improvements +1
+
+        self.mutations = len(self.pop)
+
+
 
 
 ea =  Evolution(
-                iterations = 100,
-                selection_type = '4+2')
+                iterations = 50,
+                selection_type = '2+20')
 ea.run()
