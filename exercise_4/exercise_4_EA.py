@@ -40,6 +40,36 @@ class Genome():
             self.genotype = genotype
 
 
+    def remove_neutral_tps(self):
+
+        last_mv = self.genotype[0][1]
+
+        del_idxs = []
+
+        for i in range(1, len(self.genotype)):
+            if self.genotype[i][1] == last_mv:
+                del_idxs.append(i)
+            last_mv = self.genotype[i][1]
+
+        #remove multiple idx from list
+        self.genotype = [elem for idx, elem in enumerate(self.genotype) if idx not in del_idxs]
+
+    def add_neutral_tp(self):
+        self.remove_neutral_tps()
+
+        pos = int(random()*RANGE)
+
+        last_mv = self.genotype[0][1]
+
+        for idx, (tp, mv) in enumerate(self.genotype):
+            if pos < tp:
+                self.genotype.insert(idx, (pos, last_mv))
+                return
+            else:
+                last_mv = mv
+        else:#pos > max(tp)
+            self.genotype.append((pos, last_mv))
+
 
     def mutate(self, sigma):
 
@@ -90,7 +120,7 @@ class Evolution():
         self.selection_type = selection_type
 
         self.pop = []
-        self.sigma = 0.0
+        self.sigma = 0.0#does not make sense but works
 
         self.sigma_increase = 0.0#0.0 means disabled
         self.mutations = 1
@@ -131,8 +161,14 @@ class Evolution():
             # mutation happens inside selection
             # print "select:"
             print map(lambda x: x.fitness(), self.pop)
+            # print map(lambda x : x.genotype, self.pop)
 
         print "DONE"
+        print "WINNER"
+        self.pop[0].remove_neutral_tps()
+        print self.pop[0].genotype
+        print "with"
+        print self.pop[0].fitness()
 
         return# self.mins, self.means, self.maxs, self.best_genotype
 
@@ -171,6 +207,8 @@ class Evolution():
                 #simga ++
                 self.sigma = self.sigma + self.sigma_increase
                 print "increased to ", self.sigma
+
+                # self.pop[-1].genotype.append(self.pop.genotype[-1])
         else:
             #silently skip
             pass
@@ -192,10 +230,19 @@ class Evolution():
         #if elemt changed...
         if sort_keys[0] != 0:
             print "improved!"
-            self.improvements = self.improvements + 1
+            self.improvements = 1
+            self.mutations = 0
 
         #we now sort by the index
         self.pop = [self.pop[i] for i in sort_keys]
+
+
+        #WHEN TO ADD A TRACKPOINT?
+        if self.mutations > 10:
+            self.pop[0].add_neutral_tp()
+            self.improvements = 1
+            self.mutations = 0
+            print "trackpoint added"
 
 
 
