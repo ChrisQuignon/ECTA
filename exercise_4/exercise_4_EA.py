@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import csv
 
 import vehicle_simulation as ft
-
 import copy
 
 
@@ -28,7 +27,6 @@ class Genome():
         gt = genotype
         gt.sort()
         genotype = []
-
         last_pos = -1
         for pos, mv in gt:
             if last_pos == pos:
@@ -90,7 +88,7 @@ class Genome():
     def mutate(self, sigma):
 
         #exponential grothdouble the number of trackpoints
-        for _ in range(len(self.genotype)):
+        for _ in range(5):#len(self.genotype)
             self.add_neutral_tp()
 
         #modulo (%) MAY BE BAD ( uniform distribution, you know...)
@@ -102,18 +100,6 @@ class Genome():
 
         new_tps = map(int, new_tps)
         # new_tps = map (lambda a : a%RANGE, new_tps)
-        #
-        # print 'new_tps:'
-        # print new_tps
-        #
-        # print 'new_mvs:'
-        # print new_mvs
-        #
-        # print 'zip:'
-        # print zip(new_tps, new_mvs)
-        #
-        # print ''
-        # print mutate
         self.set_genotype(zip(new_tps, new_mvs))
 
 
@@ -147,22 +133,20 @@ class Genome():
         return fit
 
 class Evolution():
-    def __init__(self, iterations, selection_type):
+    def __init__(self, iterations, selection_type, sigma = 0.002, sigma_delta=0.0):
         self.iterations = iterations
 
         self.selection_type = [c for c in selection_type if not c.isdigit()][0]
         self.parents, self.offsprings = map(int, selection_type.split(self.selection_type))
 
         self.pop = [Genome([(0, 1.0)])]
-        self.sigma = 0.002 #does not make sense but works
+        self.sigma = sigma
 
-        self.sigma_increase = 0.1#0.0 means disabled - it just drops to zero anyway
-        self.mutations = 1
-        self.improvements = 1
+        self.sigma_delta = sigma_delta
+        self.imp_rate = self.parents /float(self.parents + self.offsprings)
 
-        self.mins = []
-        self.maxs = []
-        self.means = []
+        self.best_fitness = []
+        self.sigmas = []
 
         ##INITIALIZATION
         for _ in range(1, self.parents):
@@ -180,8 +164,9 @@ class Evolution():
             # self.mutation()
             # mutation happens inside selection
 
-            print round(self.improvements/float(self.mutations), 2), 'succ with :', self.sigma
-            # print round(self.improvements/float(self.mutations), 2)
+            # print round(self.imp_rate, 2), 'succ with :', self.sigma
+            self.best_fitness.append(self.pop[0].fitness())
+            self.sigmas.append(self.sigma)
             # print map(lambda x: x.fitness(), self.pop)
             # print map(lambda x : x.genotype, self.pop)
 
@@ -193,7 +178,7 @@ class Evolution():
         print "track:"
         print self.pop[0].genotype
 
-        return# self.mins, self.means, self.maxs, self.best_genotype
+        return self.best_fitness, self.sigmas, self.pop[0]
 
     def selection(self):
 
@@ -204,7 +189,6 @@ class Evolution():
             parent = choice(parents)
             kid = copy.deepcopy(self.pop[0])
             kid.mutate(self.sigma)
-            self.mutations = self.mutations + 1
 
             #we don't care about our kids
             # while kid.fitness() == float('inf'):
@@ -223,16 +207,15 @@ class Evolution():
     def recombination(self):
 
         #TODO 1/5th rule
-        if self.sigma_increase != 0.0:
-            imp_rate = self.improvements/float(self.mutations)
+        if self.sigma_delta != 0.0:
 
-            if imp_rate > 1/5.0:
+            if self.imp_rate > 1/5.0:
                 # simga --
-                self.sigma = self.sigma * (1 + self.sigma_increase)
+                self.sigma = self.sigma * (1 + self.sigma_delta)
                 # print "increased to ", self.sigma
-            if imp_rate < 1/5.0:
+            if self.imp_rate < 1/5.0:
                 #simga ++
-                self.sigma = self.sigma * (1 - self.sigma_increase)
+                self.sigma = self.sigma * (1 - self.sigma_delta)
                 # print "decreased to ", self.sigma
         else:
             #silently skip
@@ -250,22 +233,97 @@ class Evolution():
         #if elemt changed...
         if sort_keys[0] != 0:
             print "improved!"
-        #     self.improvements = self.improvements +1
 
         #we now sort by the index
         self.pop = [self.pop[i] for i in sort_keys]
 
-        self.improvements = 0;
+        #1/5th rule
+        improvements = 0;
         for i in self.pop:
             if i.fitness() != float("inf"):
-                self.improvements = self.improvements +1
+                improvements = improvements +1
 
-        self.mutations = len(self.pop)
-
-
+        self.imp_rate = improvements/float(len(self.pop))
 
 
-ea =  Evolution(
-                iterations = 50,
-                selection_type = '2+20')
-ea.run()
+# ea =  Evolution(
+#                 iterations = 50,
+#                 selection_type = '2+20',
+#                 sigma = 0.002,
+#                 sigma_delta = 0.0)
+# fit, sigmas, run = ea.run()
+
+def wrapper(inputs):
+    iterations, selection_type, sigma, sigma_delta = inputs
+
+    fits = []
+    sigmas = []
+    best_run = (float("inf"), [])
+
+
+    for _ in range(1):
+        ea =  Evolution(
+                        iterations = iterations,
+                        selection_type = selection_type,
+                        sigma = sigma,
+                        sigma_delta = sigma_delta
+                        )
+        fit, sigma, run = ea.run()
+
+        fits.append(fit)
+        sigmas.append(sigma)
+
+        if fit[-1] < best_run[0]:
+            best_run = (fit[-1], run)
+
+    d = {
+        "iterations" : iterations,
+        "selection_type" : selection_type,
+        "sigma" : np.mean(sigmas),
+        "sigma_delta" : sigma_delta,
+        "fitness_mean": np.mean(fits),
+        "best_fitness": best_run[0],
+        }
+
+    return d
+
+
+def analysis():
+    its = [30]
+    selection_types = ['1+1', '1+20', '2+20', '1, 20', '2,20']
+    sigmas = [0.002, 0.02, 0.2]
+    sigma_deltas = [0.0, 0.01, 0.1]
+
+    ds = []
+
+    for iterations in its:
+        for selection_type in selection_types:
+            for sigma in sigmas:
+                # for sigma_delta in sigma_deltas:
+
+                    # inputs = [iterations, selection_type, sigma, sigma_delta]
+
+                inputs = [[iterations, selection_type, sigma, sigma_delta] for sigma_delta in sigma_deltas]
+
+
+                pars = 4
+                p = Pool(pars)
+                rvals = p.map(wrapper, inputs)
+                ds.extend(rvals)
+
+
+    keys = [
+            "iterations" ,
+            "selection_type",
+            "sigma",
+            "sigma_delta",
+            "fitness_mean",
+            "best_fitness"
+        ]
+
+    with open('data_vehicle_sim.csv', 'wb') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(ds)
+
+analysis()
