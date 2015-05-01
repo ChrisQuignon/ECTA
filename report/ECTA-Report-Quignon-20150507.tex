@@ -10,6 +10,7 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{color}
+\usepackage[T1]{fontenc}
 
 %Python
 \definecolor{keywords}{RGB}{255,0,90}
@@ -85,7 +86,106 @@ columns=fullflexible,
 
 \subsubsection{Fitness}
 
+%MEANMAX
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/analysis_squared_newton_hill.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/analysis_trimodal_newton_hill.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Fitness analysis of the mean (green) and maximal(red) values of the newton method (dotted) and the Hillclimber (solid).}
+\label{fig:}
+\end{figure}
+%Description
+
+%HEATMAPS
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_HC.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_SS.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Heatmap of the fitness values of the Hillclimber (left) and Steepest Descent(right) method in a 3D Landscape.}
+\label{fig:}
+\end{figure}
+
+%INERTIA LEARNING
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/learning_trimodal_ss.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/inertia_trimodal_ss.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Comparison of the fitness values with respect to the learning rate (left) and inertia(right) with the steepest descent method on the trimodal landscape.}
+\label{fig:}
+\end{figure}
+
 \subsubsection{Best result}
+
+%PLATEAU
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/runs/SD-Plateau3D_0_0,07.jpg}
+  %was SD-Plateau3D_-0.81  0.59_0.0_0.07
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/runs/SD-Plateau3D_0,22_0,02.jpg}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Two highly different runs of the steepest descent algorithm in the Plateau3D landscape. Learning rates of 0.0 (left) and 0.22 (right) and inertia 0.07 (left) and 0.02 (right).}
+\label{fig:}
+\end{figure}
+
+
+%RUNS
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/runs/HC-SquaredError2D_-1,9.jpg}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/runs/NM-SquaredError2D_-1,48.jpg}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Incrementing steps of optimization of the Hillclimber (left) and the Newton Method (right) on the squared error landscape.}
+\label{fig:}
+\end{figure}
+
 
 \subsection{Conclusion}
 
@@ -139,9 +239,31 @@ TSP
 \subsection{Parameters}
 %What could be changed
 \subsubsection{Population size}
-\subsubsection{Selection Pressure} 
-\subsubsection{Mutation}
 
+%TSP POP
+\begin{figure}
+ \center
+ \includegraphics[width=.5\linewidth]{img/ex3/tsp_fitness_population.png}
+ \caption{All fitness values (min=green, mean = blue, max = red))ordered by population.}
+\end{figure}
+
+\subsubsection{Selection Pressure} 
+
+%TSP Selection
+\begin{figure}
+ \center
+ \includegraphics[width=.5\linewidth]{img/ex3/tsp_fitness_selection.png}
+ \caption{All fitness values (min=green, mean = blue, max = red))ordered by selection pressure.}
+\end{figure}
+
+
+\subsubsection{Mutation}
+%TSP mutations
+\begin{figure}
+ \center
+ \includegraphics[width=.5\linewidth]{img/ex3/tsp_fitness_mutation.png}
+ \caption{All fitness values (min=green, mean = blue, max = red))ordered by selection mutation.}
+\end{figure}
 
 \subsection{Analysis}
 %what happened and why
@@ -152,6 +274,26 @@ Solution Validation
 \subsubsection{Fitness}
 
 \subsubsection{Best result}
+
+%TSP BEST
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex3/68,46-1-1000-200-0,2-0,6.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex3/68,46-1-1000-200-0,2-0,6-fitness.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{The best run for the travelling salesman. 1k iterations with 200 individuals, a selection of 20\% and mutation rate of 60\% (not 0.2 and 0.6 as in the image). The position of the cities are given in Lat/Long, as well as the fitness. The fitness is given as max(red), mean(blue) and min(green).}
+\label{fig:}
+\end{figure}
+%Description
 
 \subsection{Conclusion}
 
@@ -171,8 +313,14 @@ Solution Validation
 \subsection{Parameters}
 %What could be changed
 \subsubsection{Iterations}
-\subsubsection{Sigma} 
-\subsubsection{Sigma Delta}
+\subsubsection{Sigma/ Sigma Delta}
+
+%SIGMA
+\begin{figure}
+ \center
+ \includegraphics[width=.5\linewidth]{img/ex4/sigmas.png}
+ \caption{Final sigma in relation to the sigma delta over all runs.}
+\end{figure}
 
 \subsubsection{selection Mode}
 \paragraph{$1+1$}
@@ -246,6 +394,14 @@ selection & Sigma $\Delta$ & Sigma & Mean Fitness & Best Fitness \\ \hline
 
 \subsubsection{Best result}
 
+%VEHICLE BEST
+\begin{figure}
+ \center
+ \includegraphics[width=.5\linewidth]{img/ex4/1063459-1+200-0,002.png}
+ \caption{Screenshot of the best run with a final fitness of 1063459, and a fixed sigma of 0.002.}
+\end{figure}
+
+
 \subsection{Conclusion}
 
 
@@ -267,11 +423,33 @@ selection & Sigma $\Delta$ & Sigma & Mean Fitness & Best Fitness \\ \hline
 
 %\lstinputlisting[Language=Python]{ }
 
+
 %\begin{figure}
 % \center
 % \includegraphics[width= cm]{ }
 % \caption{}
 %\end{figure}
+
+
+%\begin{figure}[H]
+%\centering
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[width=.8\linewidth]{img/}
+%  %\caption{}
+%  %\label{fig:}
+%\end{minipage}%
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[width=.8\linewidth]{img/}
+%  %\caption{}
+%  %\label{fig:} 
+%\end{minipage}
+%\caption{}
+%\label{fig:}
+%\end{figure}
+%Description
+
 
 %BIBLIOGRPAHY?
 \bibliographystyle{plain}%amsalpha
