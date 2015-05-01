@@ -41,10 +41,11 @@ columns=fullflexible,
 
 \begin{document}
 
-\title{Execise 01}
-\subtitle{ Evolutionary Computation Theory and Application}
+\title{Evolutionary Computation Theory and Application}
+\subtitle{Report}
 \author{
   Quignon, Christophe \\
+  \href{https://github.com/ChrisQuignon/ECTA}{github.com/ChrisQuignon/ECTA}
   %Familyname, Name
 } 
 \date{\today}
@@ -52,24 +53,143 @@ columns=fullflexible,
 
 \maketitle
 
-\section{Implement three algorithms}
-\subsection{Basic Steepest Descent}
-\subsection{Steepest Descent with momentum}
-\subsection{Newton’s Method}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+\tableofcontents{}
+
+
+\section{Optimization}
+%Theoretic description
+
+\subsection{Problem}
 \subsubsection{Square error}
 \subsubsection{Trimodal fitness function}
 \subsubsection{3D Plateau fitness function}
+%characteristics of the problem
 
-\section{Analysis}:
-\subsection{SD: 10 equidistant starting positions and 10 learning rates}
-\subsection{MSD: 10 equidistant starting positions, 10 learning rates, 10 momenta}
-\subsection{NM: use as a reference, one run for all 10 equidistant starting positions
-as used in SD/MSD}
-\subsubsection{(with systematic sampling of starting positions)}
-\subsubsection{Error curves and time to convergence graphs}
-\subsubsection{Heat maps for SD and MSD}
-\subsection{Line graph representing min/mean/max fitness over iterations}
-\subsection{Text explanations of result}
+\subsection{Algorithms}
+\subsubsection{Basic Steepest Descent}
+\subsubsection{Steepest Descent with momentum}
+\subsubsection{Newton’s Method}
+%How do we solve it
+
+\subsection{Parameters}
+%What could be changed
+\subsubsection{Starting Positions}
+\subsubsection{Learning Rates}
+\subsubsection{Momentum}
+
+\subsection{Analysis}
+%what happened and why
+
+\subsubsection{Fitness}
+
+\subsubsection{Best result}
+
+\subsection{Conclusion}
+
+
+
+\section{Genetic Algorithms}
+%Theoretic description
+
+\subsection{Problem}
+%characteristics of the problem
+
+\subsection{Algorithms}
+%How do we solve it
+real valued, bit string
+
+\subsection{Parameters}
+%What could be changed
+\subsubsection{Population size}
+\subsubsection{Selection}
+\subsubsection{Crossover}
+\subsubsection{Mutation}
+
+
+\subsection{Analysis}
+%what happened and why
+
+\subsubsection{Parameter variations}
+
+\subsubsection{Fitness}
+
+\subsubsection{Best result}
+
+\subsection{Conclusion}
+
+
+
+\section{Travelling Salesman}
+%Theoretic description
+
+\subsection{Problem}
+%characteristics of the problem
+TSP
+
+\subsection{Algorithms}
+%How do we solve it
+
+\subsubsection{Representation}
+\paragraph{Priority list}
+\paragraph{Permutations}
+
+\subsection{Parameters}
+%What could be changed
+\subsubsection{Population size}
+\subsubsection{Selection Pressure} 
+\subsubsection{Mutation}
+
+
+\subsection{Analysis}
+%what happened and why
+Schema Theory
+Building Block Hypothesis
+Solution Validation
+
+\subsubsection{Fitness}
+
+\subsubsection{Best result}
+
+\subsection{Conclusion}
+
+
+
+
+\section{Evolutionary Algorithm}
+%Theoretic description
+
+\subsection{Problem}
+%characteristics of the problem
+
+\subsection{Algorithms}
+%How do we solve it
+
+
+\subsection{Parameters}
+%What could be changed
+\subsubsection{Iterations}
+\subsubsection{Sigma} 
+\subsubsection{Sigma Delta}
+
+\subsubsection{selection Mode}
+\paragraph{$1+1$}
+
+\paragraph{$\mu,\lambda$}
+
+\paragraph{$\mu +\lambda$}
+
+
+\subsection{Analysis}
+%what happened and why
+
+\subsubsection{Fitness}
+
+\subsubsection{Best result}
+
+\subsection{Conclusion}
 
 
 %CONTENTS
