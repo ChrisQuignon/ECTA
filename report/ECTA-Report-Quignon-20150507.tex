@@ -62,89 +62,48 @@ columns=fullflexible,
 
 \section{Optimization}
 %Theoretic description
+The first exercise was about the performance of different optimization algorithms on landscapes with raising complexities. The algorithms where simple and had little tuning parameters. They function similar to genetic algorithms by iteratively improving their performance. But they do not run in populations, there is no random mutation and no crossover. 
 
 \subsection{Problem}
 \subsubsection{Square error}
+The square error function has only one optimum and is among the most simple optimization problems. Only a a very bad parameter choice could lead to not finding an optimum.
+
 \subsubsection{Trimodal fitness function}
-\subsubsection{3D Plateau fitness function}
+The trimodal fitness function has two local optimum and a global optimum in between them. It is simple but can be used to illustrate the problem of overcoming local optima.
+
+\subsubsection{3D plateau fitness function}
+The 3D plateau fitness function is more complex then the functions before. It stretched 3 dimensions and not only 2 and has plateaus which are also tricky to overcome. This complexity already ruled out the newton method, because the derivative in 3D is tricky to implement.
 %characteristics of the problem
 
 \subsection{Algorithms}
-\subsubsection{Basic Steepest Descent}
-\subsubsection{Steepest Descent with momentum}
-\subsubsection{Newton’s Method}
 %How do we solve it
+\subsection{Hillclimber}
+The Hillclimber method is an effective an easy way to find a local optimum by iterative evaluation of all neighbouring points and choosing the best of those. It can be optimised by evaluating more neighbours but can not overcome local optima beyond the reach of the neighbours.
+\subsubsection{Basic Steepest Descent}
+The steepest descent is a variant of the Hillclimber. It does not evaluate the neighbours fitness itself but the gradient towards the neighbours. By following the gradient it converges faster than the Hillclimber.
+\subsubsection{Steepest Descent with momentum}
+The steepest descent method can be augmented by introducing a moment to the size of steps. That way it can overcome local optima. The momentum itself is defined by the last step width and scaled by the inertia.
+\subsubsection{Newton’s Method}
+In Newtons method the step width is derived by the first and second gradient of the neighbourhood of the function. Therefore it is very effective but requires exact knowledge of the function and its derivatives, which are not known for more complex problems.
 
 \subsection{Parameters}
 %What could be changed
+\subsubsection{Precision}
+The precision is used to determine when the algorithm no longer improves. for all runs it is set to 0.0001
 \subsubsection{Starting Positions}
+The starting positions highly impact the performance of a single run. In this scenario they are evenly spaced in the range of the landscape. In other scenarios it might be more practical to choose them at random.
 \subsubsection{Learning Rates}
+The learning rate is the factor by which the step width is increased or decreased per iteration. The learning rates typically are quite small. For the analysis they where:\\
+ 0.0,  0.004,  0.00711312,  0.01264911, 0.02249365, 0.04,  0.07113118,  0.12649111,  0.22493653,  0.4.  (logspace(0, 2, 9)/250)
+ The logarithmic distribution allows for a granular analysis in lower ranges and a good prediction for higher values.
 \subsubsection{Momentum}
+The momentum is defined by the inertia used to calculate it. A higher inertia means a lower adaptation rate. The values chosen where the same as for the learning rates. An inertia of zero was interpreted as no momentum.
 
 \subsection{Analysis}
 %what happened and why
-
-\subsubsection{Fitness}
-
-%MEANMAX
-\begin{figure}[H]
-\centering
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/analysis_squared_newton_hill.png}
-  %\caption{}
-  %\label{fig:}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/analysis_trimodal_newton_hill.png}
-  %\caption{}
-  %\label{fig:} 
-\end{minipage}
-\caption{Fitness analysis of the mean (green) and maximal(red) values of the newton method (dotted) and the Hillclimber (solid).}
-\label{fig:}
-\end{figure}
-%Description
-
-%HEATMAPS
-\begin{figure}[H]
-\centering
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_HC.png}
-  %\caption{}
-  %\label{fig:}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_SS.png}
-  %\caption{}
-  %\label{fig:} 
-\end{minipage}
-\caption{Heatmap of the fitness values of the Hillclimber (left) and Steepest Descent(right) method in a 3D Landscape.}
-\label{fig:}
-\end{figure}
-
-%INERTIA LEARNING
-\begin{figure}[H]
-\centering
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/learning_trimodal_ss.png}
-  %\caption{}
-  %\label{fig:}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/ex1/inertia_trimodal_ss.png}
-  %\caption{}
-  %\label{fig:} 
-\end{minipage}
-\caption{Comparison of the fitness values with respect to the learning rate (left) and inertia(right) with the steepest descent method on the trimodal landscape.}
-\label{fig:}
-\end{figure}
-
-\subsubsection{Best result}
+All of the algorithms performed very well on all landscapes. They found an optimal value typically within 50 iterations. The Newton method performed best and found the optimum of the squared error with only one step. This was due to the nature of the function and its derivatives. But newton method also worked very good for the trimodal landscape.\\
+The Hillclimber and the method of Steepest Descent almost all of the time found a local optimum. Only very low learning rates (or momentum) lead to a suboptimal termination after 50 iterations. On the other hand, very high learning rates or momentum (> 0.3) often led to a step width that did not reflect the surface and thus results in an unpredictable behaviour.\\
+Especially in the 3D landscape this often led to points outside of the defined ranges. (See Figure \ref{fig:plateau})
 
 %PLATEAU
 \begin{figure}[H]
@@ -163,9 +122,81 @@ columns=fullflexible,
   %\label{fig:} 
 \end{minipage}
 \caption{Two highly different runs of the steepest descent algorithm in the Plateau3D landscape. Learning rates of 0.0 (left) and 0.22 (right) and inertia 0.07 (left) and 0.02 (right).}
-\label{fig:}
+\label{fig:plateau}
 \end{figure}
 
+\subsubsection{Fitness}
+Since the algorithms are deterministic for a given set of parameters, it is not necessary to build the mean over a couple of runs. Instead the performance was analysed with respect to to the parameters.\\
+
+\paragraph{Starting position}
+The starting position has a huge impact on the performance because it define whether the next optimum is a local or a global one, and how far the algorithm needs to travel. For a 2D landscape the minimum fitness assembles the fitness landscape, while the maximum fitness should point out the optima. As seen in Figure\ref{fig:2dminmax} the optima of the squared error was found independent of the starting position where for the trimodal landscape the Hillclimber (dashed) sometimes could not find a optimum. 
+%MEANMAX
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/analysis_squared_newton_hill.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/analysis_trimodal_newton_hill.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Fitness analysis of the mean (green) and maximal(red) values of the newton method (solid) and the Hillclimber (dashed).}
+\label{fig:2dminmax}
+\end{figure}
+%Description
+
+In the 3D landscape, the fitness was analysed by a heat map that maps the final fitness to the starting position. All areas of the same color converge to the same fitness. As seen in Figure\ref{fig:heatmap} the Hillclimber often gets stuck at the plateau (blue). With the given parameters, the Hillclimber performed more reliable because it did not overshoot. With the right parameters, the steepest descent did perform better.
+ 
+%HEATMAPS
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_HC.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/Heatmap_SS.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Heatmap of the fitness values of the Hillclimber (left) and Steepest Descent(right) method in a 3D Landscape.}
+\label{fig:heatmap}
+\end{figure}
+
+\paragraph{Step width}
+The step width is determined by the learning rate and the inertia. Both are crucial to overcome local minima. In Figure \ref{fig:inertialearning} Those parameters are grouped and all final fitness are shown as individual dots. This allows to see how often one parameter reaches an optimal fitness.
+As the fitness for the squared error is global by nature and the overshoots in the 3D case, only the trimodal landscape is shown.\\
+From the point density one can see that the learning rate(left) is a more reliable way to point towards an optimum while the inertia(right) overcomes the local minima at 1.0 better.
+
+%INERTIA LEARNING
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/learning_trimodal_ss.png}
+  %\caption{}
+  %\label{fig:}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/ex1/inertia_trimodal_ss.png}
+  %\caption{}
+  %\label{fig:} 
+\end{minipage}
+\caption{Comparison of the fitness values with respect to the learning rate (left) and inertia(right) with the steepest descent method on the trimodal landscape.}
+\label{fig:inertialearning}
+\end{figure}
+
+\subsubsection{Best result}
+To discuss the fitness optimality on these landscapes does not give any insight because almost all runs where successfull. However the steps to reach the goals varied, as as shown in Figure \ref{fig:stepssquared}. The Hillclimber took the most steps, while the steepest descents found the optimal quickly. The fastest however has the newtons method.
 
 %RUNS
 \begin{figure}[H]
@@ -183,11 +214,13 @@ columns=fullflexible,
   %\label{fig:} 
 \end{minipage}
 \caption{Incrementing steps of optimization of the Hillclimber (left) and the Newton Method (right) on the squared error landscape.}
-\label{fig:}
+\label{fig:stepssquared}
 \end{figure}
 
 
 \subsection{Conclusion}
+The varying complexity of the fitness landscape and the degree of information about the landscape used in the algorithms had to match to show a good performance. Thus, the Hillclimber as a mostly uninformed method did a good job on all landscapes but can not overcome local optima. The performance was increased by adapting the step width and direction with a learning rate or the information about the steepest descent. Those however require tuning or additional information. The most complex and effective algorithm, Newtons method performed best.\\
+So if we have no additional information about the landscape to optimize, parameter tuning is required. If we have additional information, this can greatly improve the performance. This however is not a likely scenario.
 
 
 
