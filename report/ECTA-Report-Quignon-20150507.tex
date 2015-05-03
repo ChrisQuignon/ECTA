@@ -515,22 +515,23 @@ Of those selection modes the following where tested: '1+1', '1+20', '2+20', '1,2
 \subsection{Analysis}
 %what happened and why
 In this task it quickly turned out that the major difficulty would be to tune the mutations. A majority of all mutations leads to invalid solutions. That leads to a very slow improvement and, if the 1/5th rule is applied to a steady decrease of the sigma value. The evaluation consequently focuses on those two parameters.\\
-
+At first, the final sigma of all runs value is grouped by the Sigma Delta values to see its impact. As seen in Figure \ref{fig:sigmas}, almost all Sigmas decreased over time due to the low mutation success.
 
 %SIGMA
 \begin{figure}
  \center
  \includegraphics[width=.5\linewidth]{img/ex4/sigmas.png}
- \caption{Final sigma in relation to the sigma delta over all runs.}
+ \caption{Final Sigma in relation to the Sigma Delta over all runs.}
+ \label{fig:sigmas}
 \end{figure}
 
+For the complete analysis it is not very helpful to show a lot of graphs, because all runs where disappointingly ineffective. As depicted in Table\ref{tab:vehicle}, only three runs had a noticeable improvement, and of those only one hat an improvement in the mean value which points towards a Successful parameter set with a steady sigma of 0.2 and selection of $1+20$.\\ The high failure rate in mutations also explains the total failure of all $\mu, \lambda$ selectors.
 
-
-\begin{table}[htbp]
+\begin{table}[H]
 \caption{Fitness over 30 runs each}
 \begin{tabular}{r r r|r r }
 
-selection & Sigma $\Delta$ & Sigma & Mean Fitness & Best Fitness \\ \hline
+selection & Sigma $\Delta$ & Final Sigma & Mean Fitness & Best Fitness \\ \hline
 1+1 & 0 & 0.002 & 1228892 & 1228892 \\ 
 1+1 & 0.01 & 0.002 & 1228793 & 1228561 \\ 
 1+1 & 0.1 & 0.012 & 1225754 & 1221046 \\ 
@@ -578,13 +579,15 @@ selection & Sigma $\Delta$ & Sigma & Mean Fitness & Best Fitness \\ \hline
 %2,20 & 0.01 & 0.175 & inf & inf \\ 
 2,20 & 0.1 & 0.07 & inf & inf \\ 
 \end{tabular}
-\label{}
+\label{tab:vehicle}
 \end{table}
 
 
 \subsubsection{Fitness}
+As stated in the Analysis, an evaluation of the fitness is not helpful because it showed no systematic improvement.
 
 \subsubsection{Best result}
+The best result achieved had a Fitness of 1063459 with a fixed sigma of 0.002 and selector of $1+200$ of 100 iterations which boosted the number of mutations significantly.
 
 %VEHICLE BEST
 \begin{figure}
