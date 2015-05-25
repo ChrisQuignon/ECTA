@@ -1,0 +1,168 @@
+%\documentclass{beamer}
+%\usetheme{Pittsburgh}
+\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{default}
+\usepackage[procnames]{listings}
+\usepackage{graphicx}
+%\usepackage[toc,page]{appendix}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{float}
+\usepackage[T1]{fontenc}
+
+
+%Python
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{0,0,113}
+\definecolor{red}{RGB}{160,0,0}
+\definecolor{green}{RGB}{0,150,0}
+\lstset{language=Python,
+basicstyle=\ttfamily\scriptsize,
+keywordstyle=\color{keywords},
+commentstyle=\color{comments},
+stringstyle=\color{red},
+identifierstyle=\color{green},
+procnamekeys={def,class},
+breaklines=true,
+columns=fullflexible,
+%Numbering and Tabs
+%numbers=left,
+%tabsize=4,
+%showspaces=false,
+%showstringspaces=false
+}
+
+
+%Bibliogrpahy?
+%\usepackage{bibentry}
+%\nobibliography*
+%\bibentry{ }
+
+
+\begin{document}
+
+\title{Evolutionary Computation Theory and Application}
+\subtitle{Project Proposal}
+\author{
+  Quignon, Christophe \\
+  \href{https://github.com/ChrisQuignon/ECTA/report}{github.com/ChrisQuignon/ECTA/project}
+  %Familyname, Name
+}
+\date{\today}
+
+
+\maketitle
+
+\subsection*{Disclaimer}
+The very same data is used to attack the very same problem for the project in the course 'Learning and Adaptivity'. There, standard random forests are used to forecast the timeseries.\\
+As explained in Section \ref{sec:Solution}, this project will not duplicate this approach but enhance it.
+
+\section{Problem description}
+Heat pumps are a sustainable way to transfer thermal energy into and out of  builds to keep a comfortable temperature. But to operate a heating pump is not a trivial task, different building distribute the heat differently and weather with its chaotic nature has a major influence on the temperature flow. In addition, they suffer from a suboptimal efficiency because they often have a bad time delay from sensing to acting. This could be counteracted by predicting future temperatures to overact sensors. efficiency could be increased by predicting energy consumption and delay that to times where energy is cheap.\\
+Thus I want to predict the behaviour or an energy pump with respect to the weather. The aim is to predict 3 hours in advance. If necessary, a rough estimate of the weather can be used, since weather forecast of three hours is quite accurate.
+
+\section{Solution}
+\label{sec:Solution}
+
+Prediction is not a standard application for genetic algorithms. However, there are many publications on tuning forecast algorithms with genetic algorithms. Most often, neural networks are used.\\
+For the given problem, decision trees seem to be a good fit, because the decision rules can easily be adapted to control the heatpump. As suggested in \cite{bader2012garf}, the trees in the random forest can be enhanced by genetic algorithms. This approach, called  Genetic Algorithm based Random Forests (GARF) is relatively new and will be explored in this project.\\
+Once I will grow the random forest as a genetic algorithm from a random intialisation and once it will be started from an out of the box generated random forest to compare the results.
+
+\section{Data}
+The Recogizer GmbH provided me a dataset of 4 sensor reading, three weather indicators and an accumulated energy consumption. The data spans the time between July 2014 to February 2015, with a total of 242 days.
+
+\paragraph{Weather data:}
+The regional weather is from the official recordings of the "Deutsche Wetterdienst" (German weather service) and contains:
+
+\begin{itemize}
+\item Temperature in $^\circ C$
+\item Relative air humidity in percent
+\item Precipitation in mm (1 litre per square meter)
+\end{itemize}
+
+\paragraph{Sensor data:}
+The Measurements from the systems are:
+
+\begin{itemize}
+\item Volumetric flow rate in $m^3 / s$
+\item Rate of heat flow in watts
+\item Supply temperature in $^\circ C$
+\item Return temperature $^\circ C$
+\end{itemize}
+
+\paragraph{Accumulated data:}
+The Energy in $k Watt/hour$ in calculated per day.
+
+\section{Fitness Function}
+The fitness of a prediction is determined by its accuracy.
+
+\section{Comparison with other algorithm}
+The solution is compared to the the standard random forest prediction as done in the project for the course "Learning and Adaptivity".
+
+\section{Time plan}
+
+\begin{enumerate}
+\item Implementation
+\item Evaluation
+\item Optimization
+\item Comparison
+\item Report
+\end{enumerate}
+
+\section{Novelty}
+The GARF approach was first published in 2012. It did not get any significant attention in research. I do not know whether GARF was used for forecast.
+%CONTENTS
+%NOTES
+
+
+%COPY AND PASTE FROM HERE
+
+%\begin{enumerate}
+% \item
+%\end{enumerate}
+
+%\hyperref{link}{text}
+
+%\begin{lstlisting}[language=Python]
+%#PYTHON CODE HERE
+%\end{lstlisting}
+
+%\lstinputlisting[Language=Python]{ }
+
+
+%\begin{figure}
+% \center
+% \includegraphics[width= cm]{ }
+% \caption{}
+%\end{figure}
+
+
+%\begin{figure}[H]
+%\centering
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[width=.8\linewidth]{img/}
+%  %\caption{}
+%  %\label{fig:}
+%\end{minipage}%
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[width=.8\linewidth]{img/}
+%  %\caption{}
+%  %\label{fig:}
+%\end{minipage}
+%\caption{}
+%\label{fig:}
+%\end{figure}
+%Description
+
+
+%BIBLIOGRPAHY?
+\bibliographystyle{plain}%amsalpha
+\bibliography{bib.bib}
+%\bibentry{}
+
+\end{document}
