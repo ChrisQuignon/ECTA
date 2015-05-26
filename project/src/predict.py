@@ -9,19 +9,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 import csv
+from sklearn import tree
 
 #import dataset
 #equivalent to:
 #import ../helpers/csvimport as helper
 helper = load_source('dsimport', 'helpers/helper.py')
 
-ds = pd.read_csv('data/ds1_weather.csv', decimal=',',sep=';', parse_dates=True, index_col=[0])
+df = pd.read_csv('data/ds1_weather.csv', decimal=',',sep=';', parse_dates=True, index_col=[0])
 
 
 # ds = helper.stretch(ds)
 
-df = pd.DataFrame(ds)
-df.set_index(df.Date, inplace = True)
+# df = pd.DataFrame(ds)
+# df.set_index(df.Date, inplace = True)
 df.interpolate(inplace=True)
 df = df.resample('1Min')
 df.fillna(inplace=True, method='ffill')#we at first forwardfill
