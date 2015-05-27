@@ -17,10 +17,20 @@ class decisionLeaf():
 
     def __init__(self, val):
         self.val = val
+        self.mse = float('inf')
 
-    def predict(self, prediction_set):
-        mse = float('inf')
-        return mse, [self.val for _ in prediction_set]
+    def predict(self, predictionset):
+        return [self.val for _ in predictionset.index]
+
+
+    def update_mse(self,  input_df, outputset):
+        result = self.predict(input_df)
+
+        result = np.array(result)
+        output = np.array(outputset)
+
+        self.mse = ((result - output) ** 2).mean()
+        return self.mse
 
 
 
@@ -30,13 +40,14 @@ class decisionTree():
             self.feature = feature
             self.split = split
 
+            self.mse = float('inf')
+
             self.right_child = []
             self.set_right_child(right_child)
-            self.rmse = float('inf')
 
             self.left_child = []
             self.set_left_child(left_child)
-            self.lmse = float('inf')
+
 
     def set_left_child(self, left_child):
         if isinstance(left_child, float):
@@ -44,66 +55,74 @@ class decisionTree():
         else:
             self.left_child = left_child
 
+
     def set_right_child(self, right_child):
         if isinstance(right_child, float):
             self.right_child = decisionLeaf(right_child)
         else:
             self.right_child = right_child
 
-    def train(self, input_df, outputset):
-        left = []
+
+    def update_mse(self, input_df, outputset):
+
+        left = pd.DataFrame()
+        right = pd.DataFrame()
         leftout = []
-        right = []
         rightout = []
 
         #split the dataset
         for idx  in input_df.index:
             if input_df[self.feature][idx] < self.split:
-                left.append(input_df.ix[idx])
                 leftout.append(outputset[idx])
+                left = left.append(input_df.ix[idx])
             else:
-                right.append(input_df.ix[idx])
                 rightout.append(outputset[idx])
+                right = right.append(input_df.ix[idx])
 
-        _, left_result = self.left_child.predict(left)
-        _, right_result = self.right_child.predict(right)
+        #updatemse is reculrsive
+        self.left_child.update_mse(leftout)
+        self.right_child.update_mse(rightout)
 
-        left_result = np.asarray(left_result)
-        right_result = np.asarray(right_result)
-        leftout = np.array(leftout)
-        rightout = np.array(rightout)
+        output = []
+        output.extend(leftout)
+        output.extend(rightout)
 
-        lmse = ((left_result - leftout) ** 2).mean()
-        rmse = ((right_result - rightout) ** 2).mean()
+        result = self.predict(input_df)
 
-        self.lmse = min(self.lmse, lmse)
-        self.rmse = min(self.rmse, rmse)
+        result = np.array(result)
+        output = np.array(output)
+
+        self.mse = ((result - output) ** 2).mean()
+
+        return self.mse
 
 
     def predict(self, predictionset):
-        left = []
-        right = []
+        left = pd.DataFrame()
+        right = pd.DataFrame()
 
         #split the dataset
         for idx  in predictionset.index:
             if predictionset[self.feature][idx] < self.split:
-                left.append(predictionset.ix[idx])
+                left = left.append(predictionset.ix[idx])
             else:
-                right.append(predictionset.ix[idx])
+                right = right.append(predictionset.ix[idx])
 
-        lmse, left_val = self.left_child.predict(left)
-        rmse, right_val = self.right_child.predict(right)
 
-        if lmse > rmse:
-            # TODO check whether plus is a good operator
-            return (self.lmse + lmse, left_val)
-        else:
-            return (self.rmse + rmse, left_val)
+        left_val = self.left_child.predict(left)
+        right_val = self.right_child.predict(right)
+
+        result = []
+        result.extend(left_val)
+        result.extend(right_val)
+
+        return result
+
 
 
 #TESTING
 
-dT = decisionTree('Aussentemperatur', 12, 12.5, 11.5)
-dN = decisionTree('Vorlauftemperatur', 12, dT, 14.5)
-dT.train(df[0:100], df.Energie[0:100])
-dT.predict(df[100:200])
+dT = decisionTree('Aussentemperatur', 7, 12.5, 56.5)
+dN = decisionTree('Vorlauftemperatur', 13, dT, 57.0)
+dN.update_mse(df[0:100], df.Energie[0:100])
+dN.predict(df[10:20])
