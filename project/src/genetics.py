@@ -79,7 +79,7 @@ class Genome():
                     sigma = 0.2 * subtree.split
                     delta = gauss(subtree.split, sigma)
 
-                    new_val = subtree.val + delta
+                    new_val = subtree.split + delta
                     #TODO: fix performance
                     max_val = self.df[subtree.feature].max()
                     min_val = self.df[subtree.feature].min()
@@ -136,3 +136,7 @@ print 'CROSSOVER'
 g2.crossover(g1)
 
 print g2.genotype
+
+g2.mutate()
+g2.genotype.update_mse(df[0:100], df.Energie[0:100])
+g2.genotype.mse
