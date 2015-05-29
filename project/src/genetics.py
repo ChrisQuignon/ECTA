@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from imp import load_source
-from random import randrange, random, choice
+from random import randrange, random, choice, gauss
 import numpy as np
 import pylab
 import pandas as pd
@@ -34,6 +34,9 @@ class Genome():
             self.predict_feat = data.columns[0]
             print 'Feature ', self.predict_feat, ' choosen instead.'
 
+        self.predict_max = self.df[self.predict_feat].max()
+        self.predict_min = self.df[self.predict_feat].min()
+
         if isinstance(genotype, DecisionTree):
             self.genotype = genotype
         else:
@@ -52,12 +55,41 @@ class Genome():
 
             if isinstance(subtree, DecisionLeaf):
                 if random() < self.leaf_mutation:
-                    #TODO: mutate leaf
-                    pass
+                    #TODO: change sigma
+                    sigma = 0.2 * subtree.val
+                    delta = gauss(subtree.val, sigma)
+
+                    new_val = subtree.val + delta
+
+                    max_val = self.predict_max
+                    min_val = self.predict_min
+
+                    if new_val > max_val:
+                        subtree.val = min_val + (max_val -  new_val)
+                    elif new_val < min_val:
+                        subtree.val = max_val - (min_val -  new_val)
+                    else:
+                        subtree.val = new_val
+
+
             elif isinstance(subtree, DecisionTree):
                 if random() < self.node_mutation:
-                    #TODO: mutate node
-                    pass
+
+                    #TODO: change sigma
+                    sigma = 0.2 * subtree.split
+                    delta = gauss(subtree.split, sigma)
+
+                    new_val = subtree.val + delta
+                    #TODO: fix performance
+                    max_val = self.df[subtree.feature].max()
+                    min_val = self.df[subtree.feature].min()
+
+                    if new_val > max_val:
+                        subtree.split = min_val + (max_val -  new_val)
+                    elif new_val < min_val:
+                        subtree.split = max_val - (min_val -  new_val)
+                    else:
+                        subtree.split = new_val
 
 
     def fitness(self):
