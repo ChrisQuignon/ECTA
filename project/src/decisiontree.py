@@ -6,13 +6,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from imp import load_source
 
-# TESTING
-df = pd.read_csv('data/ds1_weather.csv', decimal=',',sep=';', parse_dates=True, index_col=[0])
-
-df = df.resample('1Min')
-df.interpolate(inplace=True)
-df.fillna(inplace=True, method='ffill')#we at first forwardfill
-df.fillna(inplace=True, method='bfill')#then do a backwards fill
+# # TESTING
+# df = pd.read_csv('data/ds1_weather.csv', decimal=',',sep=';', parse_dates=True, index_col=[0])
+#
+# df = df.resample('1Min')
+# df.interpolate(inplace=True)
+# df.fillna(inplace=True, method='ffill')#we at first forwardfill
+# df.fillna(inplace=True, method='bfill')#then do a backwards fill
 
 
 class DecisionLeaf(object):
@@ -145,20 +145,36 @@ class DecisionTree(object):
     result = np.array(result)
     output = np.array(output)
 
+    if not result.shape[0] > 0:
+        result = np.zeros_like(output)
     self.mse = ((result - output) ** 2).mean()
 
     return self.mse
 
   def predict(self, predictionset):
-    left = pd.DataFrame()
-    right = pd.DataFrame()
 
-    # split the dataset
-    for idx in predictionset.index:
-      if predictionset[self.feature][idx] < self.split:
-        left = left.append(predictionset.ix[idx])
-      else:
-        right = right.append(predictionset.ix[idx])
+    right = pd.DataFrame()
+    left = pd.DataFrame()
+
+    for i in predictionset.index:
+        if predictionset[self.feature][i] < self.split:
+            left.append(predictionset.ix[i])
+        else:
+            right.append(predictionset.ix[i])
+
+
+    # left = [predictionset.ix[i] for i in predictionset.index if predictionset[self.feature][i] < self.split]
+    # right = [predictionset.ix[i] for i in predictionset.index if not predictionset[self.feature][i] < self.split]
+    #
+    # print predictionset.index
+    #
+    # # split the dataset
+    # for idx in predictionset.index:
+    #
+    #   if predictionset[self.feature][idx] < self.split:
+    #     left = left.append(predictionset.ix[idx])
+    #   else:
+    #     right = right.append(predictionset.ix[idx])
 
     left_val = self.left_child.predict(left)
     right_val = self.right_child.predict(right)
@@ -180,13 +196,13 @@ class DecisionTree(object):
     return 1 + left_size + right_size
 
 
+# #
+# # #TESTING
+# #
+# dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
+# dN = DecisionTree('Vorlauftemperatur', 8.2, 0.2, 64.6)
+# dN[1] = dT
+# dN.update_mse(df[0:100], df.Energie[0:100])
+# print dN.predict(df[10:20])
 #
-# #TESTING
-#
-dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
-dN = DecisionTree('Vorlauftemperatur', 8.2, 0.2, 64.6)
-dN[1] = dT
-dN.update_mse(df[0:100], df.Energie[0:100])
-print dN.predict(df[10:20])
-
-print dN
+# print dN
