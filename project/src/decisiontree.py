@@ -5,6 +5,7 @@ import pylab
 import pandas as pd
 import matplotlib.pyplot as plt
 from imp import load_source
+import time
 
 # # TESTING
 # df = pd.read_csv('data/ds1_weather.csv', decimal=',',sep=';', parse_dates=True, index_col=[0])
@@ -118,63 +119,49 @@ class DecisionTree(object):
 
   def update_mse(self, input_df, outputset):
 
-    left = pd.DataFrame()
-    right = pd.DataFrame()
-    leftout = []
-    rightout = []
 
-    # split the dataset
-    for idx in range(len(input_df.index)):
-      if input_df[self.feature][idx] < self.split:
-        left = left.append(input_df.ix[idx])
-        leftout.append(outputset[idx])
-      else:
-        right = right.append(input_df.ix[idx])
-        rightout.append(outputset[idx])
+    li = []
+    ri = []
+    for i in input_df.index:
+        if input_df[self.feature][i] < self.split:
+            li.append(i)
+        else:
+            ri.append(i)
 
-    #update_mse is recursive
-    self.left_child.update_mse(left, leftout)
-    self.right_child.update_mse(right, rightout)
+    left = input_df.ix[li]
+    left_out = outputset.ix[li]
 
-    output = []
-    output.extend(leftout)
-    output.extend(rightout)
+    right = input_df.ix[ri]
+    right_out = outputset.ix[ri]
 
-    result = self.predict(input_df)
+    #update_mse recursively
+    #heavy in computation time.
+    # self.left_child.update_mse(left, leftout)
+    # self.right_child.update_mse(right, rightout)
 
-    result = np.array(result)
-    output = np.array(output)
+    left_res = self.left_child.predict(left)
+    right_res = self.right_child.predict(right)
+
+    result = np.array(left_res + right_res)
+    output = np.array(left_out + right_out)
 
     if not result.shape[0] > 0:
         result = np.zeros_like(output)
     self.mse = ((result - output) ** 2).mean()
 
-    return self.mse
 
   def predict(self, predictionset):
 
-    right = pd.DataFrame()
-    left = pd.DataFrame()
-
+    li = []
+    ri = []
     for i in predictionset.index:
         if predictionset[self.feature][i] < self.split:
-            left.append(predictionset.ix[i])
+            li.append(i)
         else:
-            right.append(predictionset.ix[i])
+            ri.append(i)
 
-
-    # left = [predictionset.ix[i] for i in predictionset.index if predictionset[self.feature][i] < self.split]
-    # right = [predictionset.ix[i] for i in predictionset.index if not predictionset[self.feature][i] < self.split]
-    #
-    # print predictionset.index
-    #
-    # # split the dataset
-    # for idx in predictionset.index:
-    #
-    #   if predictionset[self.feature][idx] < self.split:
-    #     left = left.append(predictionset.ix[idx])
-    #   else:
-    #     right = right.append(predictionset.ix[idx])
+    left = predictionset.ix[li]
+    right = predictionset.ix[ri]
 
     left_val = self.left_child.predict(left)
     right_val = self.right_child.predict(right)

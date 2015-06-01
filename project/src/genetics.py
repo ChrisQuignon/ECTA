@@ -10,6 +10,7 @@ from sklearn import tree
 from decisiontree import *
 from copy import deepcopy
 from datetime import datetime, timedelta
+import time
 
 helper = load_source('dsimport', 'helpers/helper.py')
 
@@ -180,9 +181,15 @@ class Evolution():
     def run(self):
         for i in range(self.iterations):
 
+            start_time = time.time()
             self.evaluation()
+            end_time = time.time()
+            print("EVAL: %s seconds" %(end_time - start_time))
+
             self.selection()
             self.mutation()
+
+
             #self.crossover() happens in selection
 
             # print round(self.imp_rate, 2), 'succ with :', self.sigma
@@ -194,6 +201,7 @@ class Evolution():
     def evaluation(self):
         #who won?
         #TODO: change n_samples
+
         n_samples = 1000
         rows = np.random.choice(self.df.index.values, n_samples)
 
@@ -239,23 +247,23 @@ class Evolution():
 e = Evolution(df, 3, selection_type = '1+1')
 # e = Evolution(train_data)
 e.run()
-print e.pop
-print "selecting"
-e.selection()
-print e.pop
-print 'crossover'
-print e.pop
-
-
-dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
-dN1 = DecisionTree('Vorlauftemperatur', 8.2, dT, 64.6)
-dN1.update_mse(df[0:100], df.Energie[0:100])
-print dN.predict(df[10:20])
-
-dT = DecisionTree('Aussentemperatur', 17, 17.7, 164.0)
-dN2 = DecisionTree('Vorlauftemperatur', 18.2, dT, 164.6)
-dN2.update_mse(df[0:100], df.Energie[0:100])
-
-g1 = Genome(df, dN1)
-
-g2 = Genome(df, dN2)
+# print e.pop
+# print "selecting"
+# e.selection()
+# print e.pop
+# print 'crossover'
+# print e.pop
+#
+#
+# dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
+# dN1 = DecisionTree('Vorlauftemperatur', 8.2, dT, 64.6)
+# dN1.update_mse(df[0:100], df.Energie[0:100])
+# print dN.predict(df[10:20])
+#
+# dT = DecisionTree('Aussentemperatur', 17, 17.7, 164.0)
+# dN2 = DecisionTree('Vorlauftemperatur', 18.2, dT, 164.6)
+# dN2.update_mse(df[0:100], df.Energie[0:100])
+#
+# g1 = Genome(df, dN1)
+#
+# g2 = Genome(df, dN2)
