@@ -131,6 +131,7 @@ class DecisionTree(object):
     left = input_df.ix[li]
     left_out = outputset.ix[li]
 
+
     right = input_df.ix[ri]
     right_out = outputset.ix[ri]
 
@@ -139,13 +140,17 @@ class DecisionTree(object):
     # self.left_child.update_mse(left, leftout)
     # self.right_child.update_mse(right, rightout)
 
-    left_res = self.left_child.predict(left)
-    right_res = self.right_child.predict(right)
+    result = self.left_child.predict(left)
+    result.extend(self.right_child.predict(right))
 
-    result = np.array(left_res + right_res)
-    output = np.array(left_out + right_out)
 
+
+    result = np.array(result)
+    output = np.concatenate((left_out.as_matrix(), right_out.as_matrix()))
+    output.flatten()
+    
     if not result.shape[0] > 0:
+        print 'zero, dude'
         result = np.zeros_like(output)
     self.mse = ((result - output) ** 2).mean()
 
