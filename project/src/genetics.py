@@ -11,6 +11,7 @@ from decisiontree import *
 from copy import deepcopy
 from datetime import datetime, timedelta
 import time
+import multiprocessing
 
 helper = load_source('dsimport', 'helpers/helper.py')
 
@@ -127,7 +128,10 @@ class Genome():
         else:
             self.genotype[own_idx] = deepcopy(partner_subtree)
 
-
+def par_mse(inp):
+    g, samples, predict_feat = inp
+    g.genotype.update_mse(samples, samples[predict_feat])
+    return g
 
 class Evolution():
     def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=100, selection_type = '1+1', sigma = 0.002, ):
@@ -188,11 +192,6 @@ class Evolution():
 
             self.selection()
             self.mutation()
-            print 'POP'
-            for p in self.pop:
-                print 'mse:', "%0.f" %(p.fitness()), ' size:', p.genotype.size()
-                # print p.genotype
-            print ''
 
             #self.crossover() happens in selection
 
@@ -215,13 +214,24 @@ class Evolution():
 
         samples = self.df.ix[rows]
 
-        for g in self.pop:
-            # print 'eval'
-            # print samples.describe()
-            # print samples[self.predict_feat].describe()
-            g.genotype.update_mse(samples, samples[self.predict_feat])
+        #seriell
+        # for g in self.pop:
+        #     g.genotype.update_mse(samples, samples[self.predict_feat])
 
-        self.pop = sorted(self.pop, key = lambda x: x.fitness)
+        #parallel
+        inps = [(p, samples, self.predict_feat) for p in self.pop]
+        pool = multiprocessing.Pool(len(self.pop))
+        self.pop = pool.map(par_mse, inps)
+        pool.close()
+        pool.join()
+
+        self.pop = sorted(self.pop, key = lambda x: x.fitness())
+
+        print 'POP'
+        for p in self.pop:
+            print 'mse:', "%0.f" %(p.fitness()), ' size:', p.genotype.size()
+            # print p.genotype
+        print ''
 
 
     def selection(self):
