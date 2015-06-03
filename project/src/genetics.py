@@ -190,7 +190,7 @@ class Evolution():
             self.mutation()
             print 'POP'
             for p in self.pop:
-                print 'size:', p.genotype.size(), 'mse:',  p.fitness()
+                print 'mse:', "%0.f" %(p.fitness()), ' size:', p.genotype.size()
                 # print p.genotype
             print ''
 
@@ -206,7 +206,7 @@ class Evolution():
         #who won?
         #TODO: change n_samples
 
-        n_samples = 20
+        n_samples = 1000
         rows = np.random.choice(self.df.index.values, n_samples)
 
         #removing duplicates
@@ -225,7 +225,7 @@ class Evolution():
 
 
     def selection(self):
-
+        self.pop = [p for p in self.pop if not np.isnan(p.fitness()) ]#drop nans
         parents = [self.pop[i] for i in range(self.parents)]
         kids = []
 
@@ -251,7 +251,7 @@ class Evolution():
 
 
 
-e = Evolution(df, 4, selection_type = '1+1')
+e = Evolution(df, 4, selection_type = '5+5')
 # e = Evolution(train_data)
 e.run()
 # print e.pop
