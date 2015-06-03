@@ -130,7 +130,7 @@ class Genome():
 
 
 class Evolution():
-    def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=10, selection_type = '1+1', sigma = 0.002, ):
+    def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=100, selection_type = '1+1', sigma = 0.002, ):
 
         self.df = dataframe
         self.iterations = iterations
@@ -181,14 +181,18 @@ class Evolution():
     def run(self):
         for i in range(self.iterations):
 
-            start_time = time.time()
+            # start_time = time.time()
             self.evaluation()
-            end_time = time.time()
-            print("EVAL: %s seconds" %(end_time - start_time))
+            # end_time = time.time()
+            # print("EVAL: %s seconds" %(end_time - start_time))
 
             self.selection()
             self.mutation()
-
+            print 'POP'
+            for p in self.pop:
+                print 'size:', p.genotype.size(), 'mse:',  p.fitness()
+                # print p.genotype
+            print ''
 
             #self.crossover() happens in selection
 
@@ -202,7 +206,7 @@ class Evolution():
         #who won?
         #TODO: change n_samples
 
-        n_samples = 1000
+        n_samples = 20
         rows = np.random.choice(self.df.index.values, n_samples)
 
         #removing duplicates
@@ -212,6 +216,9 @@ class Evolution():
         samples = self.df.ix[rows]
 
         for g in self.pop:
+            # print 'eval'
+            # print samples.describe()
+            # print samples[self.predict_feat].describe()
             g.genotype.update_mse(samples, samples[self.predict_feat])
 
         self.pop = sorted(self.pop, key = lambda x: x.fitness)
@@ -244,7 +251,7 @@ class Evolution():
 
 
 
-e = Evolution(df, 3, selection_type = '1+1')
+e = Evolution(df, 4, selection_type = '1+1')
 # e = Evolution(train_data)
 e.run()
 # print e.pop

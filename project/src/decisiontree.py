@@ -144,15 +144,14 @@ class DecisionTree(object):
     result.extend(self.right_child.predict(right))
 
 
-
     result = np.array(result)
     output = np.concatenate((left_out.as_matrix(), right_out.as_matrix()))
     output.flatten()
-    
-    if not result.shape[0] > 0:
-        print 'zero, dude'
-        result = np.zeros_like(output)
-    self.mse = ((result - output) ** 2).mean()
+
+    result = (result - output) ** 2
+    result = result[~np.isnan(result)] #drop nans
+
+    self.mse = result.mean(axis = 0)
 
 
   def predict(self, predictionset):
