@@ -13,16 +13,25 @@ from datetime import datetime, timedelta
 import time
 import multiprocessing
 
+
+#import dataset
+#equivalent to:
+#import ../helpers/csvimport as helper
 helper = load_source('dsimport', 'helpers/helper.py')
 
 ds = helper.dsimport()
 
+# ds = helper.stretch(ds)
+
 df = pd.DataFrame(ds)
-df.set_index(df.Date, inplace=True)
-df = df.interpolate()
+df.set_index(df.Date, inplace = True)
+df.Energie.resample('1Min', fill_method="ffill")
+df = df.resample('1Min')
+df.Energie.resample('D')
+# df.interpolate(inplace=True)
 df.fillna(inplace=True, method='ffill')#we at first forwardfill
-df.fillna(inplace=True, method='bfill')#then do a backwards fill
-df = df.resample('5Min',how="mean")
+# df.fillna(inplace=True, method='bfill')#then do a backwards fill
+
 df_norm = (df - df.mean()) / (df.max() - df.min())
 # df = df_norm;
 df_norm = df_norm.dropna();
@@ -185,26 +194,17 @@ class Evolution():
     def run(self):
         for i in range(self.iterations):
 
-            # start_time = time.time()
+            start_time = time.time()
             self.evaluation()
-            # end_time = time.time()
-            # print("EVAL: %s seconds" %(end_time - start_time))
+            end_time = time.time()
+            print("EVAL: %s seconds" %(end_time - start_time))
 
             self.selection()
             self.mutation()
 
-            #self.crossover() happens in selection
-
-            # print round(self.imp_rate, 2), 'succ with :', self.sigma
-            # self.best_fitness.append(self.pop[0].fitness())
-            # self.sigmas.append(self.sigma)
-            # print map(lambda x: x.fitness(), self.pop)
-            # print map(lambda x : x.genotype, self.pop)
 
     def evaluation(self):
-        #who won?
         #TODO: change n_samples
-
         n_samples = 1000
         rows = np.random.choice(self.df.index.values, n_samples)
 
@@ -215,15 +215,16 @@ class Evolution():
         samples = self.df.ix[rows]
 
         #seriell
-        # for g in self.pop:
-        #     g.genotype.update_mse(samples, samples[self.predict_feat])
+        for g in self.pop:
+            g.genotype.update_mse(samples, samples[self.predict_feat])
 
-        #parallel
-        inps = [(p, samples, self.predict_feat) for p in self.pop]
-        pool = multiprocessing.Pool(len(self.pop))
-        self.pop = pool.map(par_mse, inps)
-        pool.close()
-        pool.join()
+        # # parallel
+        # # drive access is not faster...
+        # inps = [(p, samples, self.predict_feat) for p in self.pop]
+        # pool = multiprocessing.Pool(len(self.pop))
+        # self.pop = pool.map(par_mse, inps)
+        # pool.close()
+        # pool.join()
 
         self.pop = sorted(self.pop, key = lambda x: x.fitness())
 
