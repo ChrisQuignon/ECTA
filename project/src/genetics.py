@@ -33,20 +33,17 @@ df.Energie.resample('D')
 df.fillna(inplace=True, method='ffill')#we at first forwardfill
 # df.fillna(inplace=True, method='bfill')#then do a backwards fill
 
-df_norm = (df - df.mean()) / (df.max() - df.min())
+df_norm = df.dropna();
+df_norm = (df_norm - df_norm.min())
+df_norm = df_norm /df_norm.max()
 # df = df_norm;
-df_norm = df_norm.dropna();
 train_start = df_norm.index.searchsorted(datetime(2014, 7, 1,0,0))
 train_end = df_norm.index.searchsorted(datetime(2014, 12, 1,0,0))
 
 
 train_data = df_norm.ix[train_start:train_end]
-# to_be_predicted = ['Energie'];
-# to_be_input = ["Aussentemperatur","Niederschlag","Relative Feuchte","Ruecklauftemperatur",
-# 			   "Volumenstrom" , "Vorlauftemperatur"]
-
-# tip = train_data[to_be_input]
-# top = train_data[to_be_predicted]
+test_data = df_norm.ix[train_end:]
+test_data = test_data.resample('D')
 
 class Genome():
     def __init__(self, data, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8, predict_feat = 'Energie'):
@@ -77,6 +74,11 @@ class Genome():
 
     def mutate(self):
         for subtree in self.genotype:
+
+            #depth should not go bejond 30
+            if subtree.depth() > 30:
+                print "Tree depth of ", subtree.depth(), 'reached'
+                return
 
             if isinstance(subtree, DecisionLeaf):
                 if random() < self.leaf_mutation:
@@ -210,8 +212,14 @@ class Evolution():
             maxs.append(fits[-1])
             means.append(np.mean(fits))
 
+        #AND THE WINNER IS
+        winner = self.pop[0].genotype
+        best_result = winner.predict(test_data)
+        mse = winner.update_mse(test_data, test_data[self.predict_feat])
 
-        pylab.ylim((0,1))
+        #PLOT min man max plot
+        # pylab.ylim((0,1))
+        pylab.yscale('log')
         pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
         pylab.xlabel('iteration')
         pylab.ylabel('fitness')
@@ -221,7 +229,22 @@ class Evolution():
         pylab.tight_layout()
         pylab.savefig('img/' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
         # pylab.show()
+        pylab.clf()
 
+        #PLOT PREDICTION
+        # pylab.ylim((0,1))
+        pylab.yscale('log')
+        pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
+        pylab.xlabel('date')
+        pylab.ylabel('fitness')
+        # pylab.plot_date(x=test_data[self.predict_feat].index, y=best_result, fmt="r-")
+        # pylab.plot_date(x=test_data[self.predict_feat].index, y=test_data[self.predict_feat], fmt="g-")
+        pylab.plot(best_result, "r-")
+        pylab.plot(test_data[self.predict_feat], "g-")
+        pylab.tight_layout()
+        # pylab.show()
+        pylab.savefig('img/best-' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        pylab.clf()
 
         return min(mins)
 
@@ -250,11 +273,11 @@ class Evolution():
 
         self.pop = sorted(self.pop, key = lambda x : x.fitness())
 
-        print 'POP'
-        for p in self.pop:
-            print 'mse:', "%0.4f" %(p.fitness()), ' size:', p.genotype.size()
-            # print p.genotype
-        print ''
+        # print 'POP'
+        # for p in self.pop:
+        #     print 'mse:', "%0.4f" %(p.fitness()), ' size:', p.genotype.size()
+        #     # print p.genotype
+        # print ''
         return [x.fitness() for x in self.pop]
 
 
@@ -284,21 +307,10 @@ class Evolution():
         pass
 
 
-sigmas = [0.8, 0.4, 0.2, 0.1, 0.05, 0.005, 0.00005]#
-iterations = [100, 500, 1000]
-selections = ['1+1', '2+10', '4+20', '4+60', '1,1', '1,10', '2,2', '2,20', '4,4', '10,10']
-init_tree_depths = [2, 4, 8]
-leaf_mutations = [0.4, 0.2, 0.1, 0.01]
-node_mutations = [0.8, 0.6, 0.4, 0.2]
-
-args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
-
-args = list(product(*args))
-
-ds = []
-
 def par_wrap(arg):
     sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
+
+    print 'start', arg
 
     e = Evolution(train_data,
                     iterations = iterations,
@@ -311,8 +323,7 @@ def par_wrap(arg):
         genome.node_mutation = node_mutation
     min_ = e.run()
 
-    d = {
-         "sigma"           : sigma,
+    d = {"sigma"           : sigma,
          "iterations"      : iterations,
          "selection"       : selection,
          "init_tree_depth" : init_tree_depth,
@@ -321,7 +332,29 @@ def par_wrap(arg):
          'min'             : min_,
          'tree'            : e.pop[0].genotype
          }
+
+    print 'end', arg
     return d
+
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+iterations = [100, 500, 1000]
+selections = ['1+1',  '4+16', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [2, 4, 8]
+# leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+# node_mutations = [0.8, 0.6, 0.4, 0.2]
+#
+# sigmas = [0.2]
+# iterations = [100]
+# selections = ['1+4']
+# init_tree_depths = [2]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
+
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
+
+args = list(product(*args))
+
+ds = []
 
 
 # # parallel run
@@ -329,31 +362,6 @@ pool = multiprocessing.Pool(4)
 ds = pool.map(par_wrap, args)
 pool.close()
 pool.join()
-
-# for arg in args:
-#     sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
-#
-#     e = Evolution(train_data,
-#                     iterations = iterations,
-#                     init_tree_depth=init_tree_depth,
-#                     predict_feat='Energie',
-#                     selection_type = selection)
-#     for genome in e.pop:
-#         genome.sigma = sigma
-#         genome.leaf_mutation = leaf_mutation
-#         genome.node_mutation = node_mutation
-#     min_ = e.run()
-#
-#     d = {
-#          "sigma"           : sigma,
-#          "iterations"      : iterations,
-#          "selection"       : selection,
-#          "init_tree_depth" : init_tree_depth,
-#          "leaf_mutation"   : leaf_mutation,
-#          "node_mutation"   : node_mutation,
-#          'min'             : min_
-#          }
-#     ds.append(d)
 
 keys = ["sigma",
      "iterations",
