@@ -337,9 +337,9 @@ def par_wrap(arg):
     return d
 
 sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-iterations = [100, 500, 1000]
-selections = ['1+1',  '4+16', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
-init_tree_depths = [2, 4, 8]
+iterations = [100]
+selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [3, 6]
 # leaf_mutations = [0.4, 0.2, 0.1, 0.01]
 # node_mutations = [0.8, 0.6, 0.4, 0.2]
 #
