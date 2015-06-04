@@ -12,7 +12,8 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 import time
 import multiprocessing
-
+from itertools import product
+import csv
 
 #import dataset
 #equivalent to:
@@ -43,12 +44,12 @@ train_data = df_norm.ix[train_start:train_end]
 # to_be_predicted = ['Energie'];
 # to_be_input = ["Aussentemperatur","Niederschlag","Relative Feuchte","Ruecklauftemperatur",
 # 			   "Volumenstrom" , "Vorlauftemperatur"]
-#
+
 # tip = train_data[to_be_input]
 # top = train_data[to_be_predicted]
 
 class Genome():
-    def __init__(self, data, genotype, predict_feat = 'Energie', leaf_mutation = 0.1, node_mutation = 0.8):
+    def __init__(self, data, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8, predict_feat = 'Energie'):
         if predict_feat in data.columns:
             self.df = data
             self.predict_feat = predict_feat
@@ -69,6 +70,7 @@ class Genome():
             feature  = choice(self.df.columns)
             self.genotype = DecisionLeaf(0.0)
 
+        self.sigma = sigma
         self.leaf_mutation = leaf_mutation
         self.node_mutation  = node_mutation
 
@@ -79,7 +81,7 @@ class Genome():
             if isinstance(subtree, DecisionLeaf):
                 if random() < self.leaf_mutation:
                     #TODO: change sigma
-                    sigma = 0.2 * subtree.val
+                    sigma = self.sigma * subtree.val
                     delta = gauss(subtree.val, sigma)
 
                     new_val = subtree.val + delta
@@ -99,7 +101,7 @@ class Genome():
                 if random() < self.node_mutation:
 
                     #TODO: change sigma
-                    sigma = 0.2 * subtree.split
+                    sigma = self.sigma * subtree.split
                     delta = gauss(subtree.split, sigma)
 
                     new_val = subtree.split + delta
@@ -143,7 +145,7 @@ def par_mse(inp):
     return g
 
 class Evolution():
-    def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=100, selection_type = '1+1', sigma = 0.002, ):
+    def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=100, selection_type = '1+1'):
 
         self.df = dataframe
         self.iterations = iterations
@@ -159,14 +161,10 @@ class Evolution():
         self.parents, self.offsprings = map(int, selection_type.split(self.selection_type))
 
         self.pop = []
-        self.sigma = sigma
-
         self.best_fitness = []
-        self.sigmas = []
-
         ##INITIALIZATION
         for _ in range(0, self.parents):
-            tree = self.spawn_tree(init_tree_depth)
+            tree = self.spawn_tree(self.init_tree_depth)
             genome = Genome(df, tree)
             self.pop.append(genome)
 
@@ -192,20 +190,44 @@ class Evolution():
 
 
     def run(self):
+
+        mins = []
+        means = []
+        maxs = []
+
+        self.evaluation()
         for i in range(self.iterations):
 
-            start_time = time.time()
-            self.evaluation()
-            end_time = time.time()
-            print("EVAL: %s seconds" %(end_time - start_time))
+            # start_time = time.time()
+            # end_time = time.time()
+            # print("EVAL: %s seconds" %(end_time - start_time))
 
             self.selection()
             self.mutation()
+            fits = self.evaluation()
 
+            mins.append(fits[0])
+            maxs.append(fits[-1])
+            means.append(np.mean(fits))
+
+
+        pylab.ylim((0,1))
+        pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
+        pylab.xlabel('iteration')
+        pylab.ylabel('fitness')
+        pylab.plot(mins, color = 'green')
+        pylab.plot(maxs, color = 'red')
+        pylab.plot(means, color = 'blue')
+        pylab.tight_layout()
+        pylab.savefig('img/' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        # pylab.show()
+
+
+        return min(mins)
 
     def evaluation(self):
         #TODO: change n_samples
-        n_samples = 1000
+        n_samples = 100
         rows = np.random.choice(self.df.index.values, n_samples)
 
         #removing duplicates
@@ -226,13 +248,14 @@ class Evolution():
         # pool.close()
         # pool.join()
 
-        self.pop = sorted(self.pop, key = lambda x: x.fitness())
+        self.pop = sorted(self.pop, key = lambda x : x.fitness())
 
         print 'POP'
         for p in self.pop:
-            print 'mse:', "%0.f" %(p.fitness()), ' size:', p.genotype.size()
+            print 'mse:', "%0.4f" %(p.fitness()), ' size:', p.genotype.size()
             # print p.genotype
         print ''
+        return [x.fitness() for x in self.pop]
 
 
     def selection(self):
@@ -256,32 +279,99 @@ class Evolution():
             print "selection type unkown!"
 
     def mutation(self):
-        for g in self.pop:
+        for g in self.pop[1:]:#ELITISM
             g.mutate()
         pass
 
 
+sigmas = [0.8, 0.4, 0.2, 0.1, 0.05, 0.005, 0.00005]#
+iterations = [100, 500, 1000]
+selections = ['1+1', '2+10', '4+20', '4+60', '1,1', '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [2, 4, 8]
+leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+node_mutations = [0.8, 0.6, 0.4, 0.2]
 
-e = Evolution(df, 4, selection_type = '5+5')
-# e = Evolution(train_data)
-e.run()
-# print e.pop
-# print "selecting"
-# e.selection()
-# print e.pop
-# print 'crossover'
-# print e.pop
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
+
+args = list(product(*args))
+
+ds = []
+
+def par_wrap(arg):
+    sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
+
+    e = Evolution(train_data,
+                    iterations = iterations,
+                    init_tree_depth=init_tree_depth,
+                    predict_feat='Energie',
+                    selection_type = selection)
+    for genome in e.pop:
+        genome.sigma = sigma
+        genome.leaf_mutation = leaf_mutation
+        genome.node_mutation = node_mutation
+    min_ = e.run()
+
+    d = {
+         "sigma"           : sigma,
+         "iterations"      : iterations,
+         "selection"       : selection,
+         "init_tree_depth" : init_tree_depth,
+         "leaf_mutation"   : leaf_mutation,
+         "node_mutation"   : node_mutation,
+         'min'             : min_,
+         'tree'            : e.pop[0].genotype
+         }
+    return d
+
+
+# # parallel run
+pool = multiprocessing.Pool(4)
+ds = pool.map(par_wrap, args)
+pool.close()
+pool.join()
+
+# for arg in args:
+#     sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
 #
+#     e = Evolution(train_data,
+#                     iterations = iterations,
+#                     init_tree_depth=init_tree_depth,
+#                     predict_feat='Energie',
+#                     selection_type = selection)
+#     for genome in e.pop:
+#         genome.sigma = sigma
+#         genome.leaf_mutation = leaf_mutation
+#         genome.node_mutation = node_mutation
+#     min_ = e.run()
 #
-# dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
-# dN1 = DecisionTree('Vorlauftemperatur', 8.2, dT, 64.6)
-# dN1.update_mse(df[0:100], df.Energie[0:100])
-# print dN.predict(df[10:20])
-#
-# dT = DecisionTree('Aussentemperatur', 17, 17.7, 164.0)
-# dN2 = DecisionTree('Vorlauftemperatur', 18.2, dT, 164.6)
-# dN2.update_mse(df[0:100], df.Energie[0:100])
-#
-# g1 = Genome(df, dN1)
-#
-# g2 = Genome(df, dN2)
+#     d = {
+#          "sigma"           : sigma,
+#          "iterations"      : iterations,
+#          "selection"       : selection,
+#          "init_tree_depth" : init_tree_depth,
+#          "leaf_mutation"   : leaf_mutation,
+#          "node_mutation"   : node_mutation,
+#          'min'             : min_
+#          }
+#     ds.append(d)
+
+keys = ["sigma",
+     "iterations",
+     "selection",
+     "init_tree_depth",
+     "leaf_mutation",
+     "node_mutation",
+     'min',
+     'tree'
+]
+
+with open('img/treerun.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(ds)
+
+
+
+
+# e = Evolution(train_data, 4, iterations = 10, selection_type = '2+2')
+# e.run()
