@@ -45,6 +45,10 @@ train_data = df_norm.ix[train_start:train_end]
 test_data = df_norm.ix[train_end:]
 test_data = test_data.resample('D')
 
+def bound(value, low=0, high=1):
+    diff = high - low
+    return (((value - low) % diff) + low)
+
 class Genome():
     def __init__(self, data, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8, predict_feat = 'Energie'):
         if predict_feat in data.columns:
@@ -65,7 +69,7 @@ class Genome():
             print "Random leaf set"
 
             feature  = choice(self.df.columns)
-            self.genotype = DecisionLeaf(0.0)
+            self.genotype = DecisionLeaf(0.5)
 
         self.sigma = sigma
         self.leaf_mutation = leaf_mutation
@@ -73,22 +77,23 @@ class Genome():
 
     def mutate(self):
 
-        #TODO:
-        # check for values above or equals 1
-        # check for values below or quals zero
+        # TODO:
+        #MAYBE NOT MUTATE EVERY SUBTREE!
 
-        #
+        # for subtree in p.genotype:
+        # for i in range(subtree.size()):
+        #     if isinstance(subtree, DecisionTree):
+        #         print subtree[i]
+
+        # decide whether to mutate leaf or node
+        # pick which one
+        #   mutate
 
         for subtree in self.genotype:
 
-            #depth should not go beyond 30
-            if subtree.depth() > 30:
-                print "Tree depth of ", subtree.depth(), 'reached'
-                return
-
             if isinstance(subtree, DecisionLeaf):
                 if random() < self.leaf_mutation:
-                    #TODO: change sigma
+
                     sigma = self.sigma * subtree.val
                     delta = gauss(subtree.val, sigma)
 
@@ -97,32 +102,25 @@ class Genome():
                     max_val = self.predict_max
                     min_val = self.predict_min
 
-                    if new_val > max_val:
-                        subtree.val = min_val + (max_val -  new_val)
-                    elif new_val < min_val:
-                        subtree.val = max_val - (min_val -  new_val)
-                    else:
-                        subtree.val = new_val
+                    new_val = bound(new_val, self.predict_min, self.predict_max)
+
+                    subtree.val = new_val
 
 
             elif isinstance(subtree, DecisionTree):
                 if random() < self.node_mutation:
 
-                    #TODO: change sigma
                     sigma = self.sigma * subtree.split
                     delta = gauss(subtree.split, sigma)
 
                     new_val = subtree.split + delta
-                    #TODO: fix performance
+
                     max_val = self.df[subtree.feature].max()
                     min_val = self.df[subtree.feature].min()
 
-                    if new_val > max_val:
-                        subtree.split = min_val + (max_val -  new_val)
-                    elif new_val < min_val:
-                        subtree.split = max_val - (min_val -  new_val)
-                    else:
-                        subtree.split = new_val
+                    new_val = bound(new_val, self.predict_min, self.predict_max)
+
+                    subtree.split = new_val
 
     def fitness(self):
         return self.genotype.mse
@@ -189,9 +187,12 @@ class Evolution():
             left = self.spawn_tree(depth - 1)
             right = self.spawn_tree(depth - 1)
 
-            feature = choice([ x for x in df.columns if x is not self.predict_feat])
+            feature = choice([ x for x in self.df.columns if x != self.predict_feat])
 
             split = choice(self.df[feature])
+
+            if split == 0.0:#zero splits are hard to mutate
+                split = 0.5
 
         return DecisionTree(feature, split, left, right)
 
@@ -232,7 +233,7 @@ class Evolution():
         pylab.plot(maxs, color = 'red')
         pylab.plot(means, color = 'blue')
         pylab.tight_layout()
-        pylab.savefig('img/_' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        pylab.savefig('img/' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
         # pylab.show()
         pylab.clf()
 
@@ -241,17 +242,17 @@ class Evolution():
         # pylab.yscale('log')
         pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
         pylab.xlabel('date')
-        pylab.ylabel('fitness')
+        pylab.ylabel('prediction')
         # pylab.plot_date(x=test_data[self.predict_feat].index, y=best_result, fmt="r-")
         # pylab.plot_date(x=test_data[self.predict_feat].index, y=test_data[self.predict_feat], fmt="g-")
         pylab.plot(best_result, "r-")
         pylab.plot(test_data[self.predict_feat], "g-")
         pylab.tight_layout()
         # pylab.show()
-        pylab.savefig('img/_best-' + str(min(mins)) + '=' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        pylab.savefig('img/best-' + str(min(mins)) + '=' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
         pylab.clf()
 
-        return min(mins)
+        return min(mins), winner.mse
 
     def evaluation(self):
         #TODO: change n_samples
@@ -307,7 +308,10 @@ class Evolution():
 
     def mutation(self):
         for g in self.pop[1:]:#ELITISM
-            g.mutate()
+            if g.genotype.depth() < 60:
+                g.mutate()
+            else:
+                print g.genotype.depth(), ' ',
         pass
 
 
@@ -325,7 +329,7 @@ def par_wrap(arg):
         genome.sigma = sigma
         genome.leaf_mutation = leaf_mutation
         genome.node_mutation = node_mutation
-    min_ = e.run()
+    min_, predict_mse = e.run()
 
     d = {"sigma"           : sigma,
          "iterations"      : iterations,
@@ -334,37 +338,40 @@ def par_wrap(arg):
          "leaf_mutation"   : leaf_mutation,
          "node_mutation"   : node_mutation,
          'min'             : min_,
-         'tree'            : e.pop[0].genotype
+         'tree'            : e.pop[0].genotype,
+         'predict_mse'     : predict_mse
          }
 
     print 'end', arg
     return d
 
-sigmas = [0.2]#
+
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
 iterations = [100]
-selections = ['4+16']
-init_tree_depths = [6]
-leaf_mutations = [0.1]
-node_mutations = [0.4]
+selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [3, 6]
+# leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+# node_mutations = [0.8, 0.6, 0.4, 0.2]
 #
 # sigmas = [0.2]
 # iterations = [100]
 # selections = ['1+4']
 # init_tree_depths = [2]
-# leaf_mutations = [0.1]
-# node_mutations = [0.8]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
 
 args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
 
 args = list(product(*args))
 
-args = args
 
 ds = []
 
+#TODO:
+#Fix mutation at all subtrees
 
-# # parallel run
-pool = multiprocessing.Pool(4)
+# parallel run
+pool = multiprocessing.Pool(6)
 ds = pool.map(par_wrap, args)
 pool.close()
 pool.join()
@@ -376,15 +383,14 @@ keys = ["sigma",
      "leaf_mutation",
      "node_mutation",
      'min',
-     'tree'
+     'tree',
+     'predict_mse'
 ]
 
-with open('img/_treerun.csv', 'wb') as output_file:
+with open('img/treerun.csv', 'wb') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(ds)
-
-
 
 
 # e = Evolution(train_data, 4, iterations = 10, selection_type = '2+2')

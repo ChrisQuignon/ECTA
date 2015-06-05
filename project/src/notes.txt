@@ -1,0 +1,26 @@
+normalization
+
+cap between min and max
+
+max depth for mutation = 30
+	-> max depth = 60
+
+fitness is calc on a random subset -> instable
+
+fitness is not prediction strength, because prediction set is hold as unknown
+
+Nans cause error and have unknown origin
+
+the prediction is not (yet) the same as in LA
+
+, selectors tend to get worse
+
+we rarely improve
+
+prediction usually is one single line
+
+elitism seems not to work correctly
+
+we mutate every subtree, maybe thats not a good idea
+
+zero splits are set to 0.5

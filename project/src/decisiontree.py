@@ -95,7 +95,7 @@ class DecisionTree(object):
         return
 
   def __repr__(self):
-      s = 'if x[' + str(self.feature) + '] < ' + str(self.split) + ':\n'
+      s = 'if x[' + str(self.feature) + '] <= ' + str(self.split) + ':\n'
 
       for left_line in str(self.left_child).split('\n'):#indent
           s = s + '  ' + left_line + '\n'
@@ -159,7 +159,7 @@ class DecisionTree(object):
     li = []
     ri = []
     for i in predictionset.index:
-        if predictionset[self.feature][i] < self.split:
+        if predictionset[self.feature][i] <= self.split:
             li.append(i)
         else:
             ri.append(i)
