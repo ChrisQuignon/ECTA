@@ -71,11 +71,17 @@ class Genome():
         self.leaf_mutation = leaf_mutation
         self.node_mutation  = node_mutation
 
-
     def mutate(self):
+
+        #TODO:
+        # check for values above or equals 1
+        # check for values below or quals zero
+
+        #
+
         for subtree in self.genotype:
 
-            #depth should not go bejond 30
+            #depth should not go beyond 30
             if subtree.depth() > 30:
                 print "Tree depth of ", subtree.depth(), 'reached'
                 return
@@ -117,7 +123,6 @@ class Genome():
                         subtree.split = max_val - (min_val -  new_val)
                     else:
                         subtree.split = new_val
-
 
     def fitness(self):
         return self.genotype.mse
@@ -167,7 +172,7 @@ class Evolution():
         ##INITIALIZATION
         for _ in range(0, self.parents):
             tree = self.spawn_tree(self.init_tree_depth)
-            genome = Genome(df, tree)
+            genome = Genome(self.df, tree)
             self.pop.append(genome)
 
     def spawn_tree(self, depth):
@@ -227,13 +232,13 @@ class Evolution():
         pylab.plot(maxs, color = 'red')
         pylab.plot(means, color = 'blue')
         pylab.tight_layout()
-        pylab.savefig('img/' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        pylab.savefig('img/_' + str(min(mins)) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
         # pylab.show()
         pylab.clf()
 
         #PLOT PREDICTION
-        # pylab.ylim((0,1))
-        pylab.yscale('log')
+        pylab.ylim((0,1))
+        # pylab.yscale('log')
         pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
         pylab.xlabel('date')
         pylab.ylabel('fitness')
@@ -243,7 +248,7 @@ class Evolution():
         pylab.plot(test_data[self.predict_feat], "g-")
         pylab.tight_layout()
         # pylab.show()
-        pylab.savefig('img/best-' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
+        pylab.savefig('img/_best-' + str(min(mins)) + '=' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
         pylab.clf()
 
         return min(mins)
@@ -251,6 +256,7 @@ class Evolution():
     def evaluation(self):
         #TODO: change n_samples
         n_samples = 100
+        #random choices make the fitness function in precise
         rows = np.random.choice(self.df.index.values, n_samples)
 
         #removing duplicates
@@ -287,7 +293,6 @@ class Evolution():
         kids = []
 
         for _ in range(self.offsprings):
-
             kid = deepcopy(choice(parents))
             partner = choice(parents)
             kid.crossover(partner)
@@ -295,7 +300,6 @@ class Evolution():
 
         if self.selection_type == '+':
             self.pop = parents + kids
-
         elif self.selection_type == ',':
             self.pop = kids
         else:
@@ -336,23 +340,25 @@ def par_wrap(arg):
     print 'end', arg
     return d
 
-sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+sigmas = [0.2]#
 iterations = [100]
-selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
-init_tree_depths = [3, 6]
-# leaf_mutations = [0.4, 0.2, 0.1, 0.01]
-# node_mutations = [0.8, 0.6, 0.4, 0.2]
+selections = ['4+16']
+init_tree_depths = [6]
+leaf_mutations = [0.1]
+node_mutations = [0.4]
 #
 # sigmas = [0.2]
 # iterations = [100]
 # selections = ['1+4']
 # init_tree_depths = [2]
-leaf_mutations = [0.1]
-node_mutations = [0.8]
+# leaf_mutations = [0.1]
+# node_mutations = [0.8]
 
 args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
 
 args = list(product(*args))
+
+args = args
 
 ds = []
 
@@ -373,7 +379,7 @@ keys = ["sigma",
      'tree'
 ]
 
-with open('img/treerun.csv', 'wb') as output_file:
+with open('img/_treerun.csv', 'wb') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(ds)
