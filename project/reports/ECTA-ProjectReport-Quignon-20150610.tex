@@ -1,0 +1,214 @@
+\documentclass{beamer}
+\usetheme{Pittsburgh} 
+%\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{default}
+\usepackage[procnames]{listings}
+\usepackage{graphicx}
+%\usepackage[toc,page]{appendix}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{color}
+%\usepackage{csvsimple}
+\usepackage{float}
+\usepackage[T1]{fontenc}
+
+
+%Bibliogrpahy?
+%\usepackage{bibentry}
+%\nobibliography*
+%\bibentry{ }
+
+%Python
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{0,0,113}
+\definecolor{red}{RGB}{160,0,0}
+\definecolor{green}{RGB}{0,150,0}
+\lstset{language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{keywords},
+    commentstyle=\color{comments},
+    stringstyle=\color{red},
+    identifierstyle=\color{green},
+    breaklines = true,
+    columns=fullflexible,
+    %Numbering and tabs
+    %numbers=left,
+    %numberstyle=\tiny\color{gray},
+    %stepnumber=2,
+    %numbersep=1em,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false}
+
+
+\begin{document}
+
+\title{Predicting energy consumption of a heat pump}
+\subtitle{by evolving decision trees}
+\author{
+  Quignon, Christophe \\
+  %Familyname, Name
+} 
+\institute{Hochschule Bonn Rhein Sieg}
+\date{\today}
+
+\begin{frame}
+\titlepage{}
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Progress}
+%\framesubtitle{Commits}
+%\begin{itemize}
+%\item genetics ready for run, slow as hell, no outcome 
+%\item 10x speedup in eval implemented. Booyah!
+%\item debugging mse values, not done yet
+%\item mse = nan error fixed
+%\item genetics runs fine
+%\item sort fixed
+%\item Energie is now ff
+%\item parameter run set up
+%\item viz of the best and max depth of 30 for mutation set
+%\item Mayor Bug: genomes df was not normed!
+%\item lots of debugging, little of progress
+%\end{itemize}
+%\end{frame}
+
+\begin{frame}
+\frametitle{Progress}
+\framesubtitle{Decision Tree}
+\begin{itemize}
+\item Failed attempt to manipulate the "out of the box" decision tree.
+The library is calling C code.
+\item Implemented my own decision tree. Very similar to the genetic programming
+\item Genome class implemented
+\item Performance
+\item Debugging
+\item Complete runs in parallel possible
+\item Parameter runs done
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Progress}
+\framesubtitle{Genome}
+
+\begin{lstlisting}[language=Python]
+class Genome():
+    def __init__(self, data, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8, predict_feat = 'Energie'):
+    ...
+\end{lstlisting}
+
+\begin{itemize}
+\item mutation moves split or outcome value
+\item fitness is the mse for 100 (1000) random subsamples (instable!)
+\item validation is the fitness of unknown data (!= fitness)
+\item crossover swaps a random subtree, so that depth for mutation < 60
+\item evaluation can be set as in the vehicle exercise
+\end{itemize}
+\hbox{}
+Runs fine, does not improve.
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Parameter run}
+\framesubtitle{Selections}
+\begin{lstlisting}[language=Python]
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]
+selections = ['2+2',  '4+16', '2,2', '4,16']
+#, '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [3, 6]
+
+iterations = [100]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
+\end{lstlisting}
+
+\begin{itemize}
+\item
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Parameter run}
+\framesubtitle{Mutation rates (WIP)}
+
+\begin{lstlisting}[language=Python]
+leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+node_mutations = [0.8, 0.6, 0.4, 0.2]
+
+iterations = [100]
+sigmas = [0.2]
+selections = ['1+4']
+init_tree_depths = [2]
+
+\end{lstlisting}
+
+\begin{itemize}
+\item
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{\#TODO}
+
+\begin{itemize}
+\item Mutation
+\item Invest on randomness of ff
+\item \textbf{Get a decent prediction on an easy problem (Energie)}
+\item \dots
+\item Use time shifted input/output as in Learning and adaptivity
+\item Write parser for "out of the box" decision trees 
+\end{itemize}
+
+
+\end{frame}
+
+
+
+%CONTENTS
+%NOTES
+
+%\begin{frame}[fragile, allowframebreaks]
+%\frametitle{}
+%\framesubtitle{}
+%give your initials so we know whom to bug
+%tabulars and long boring stuff is in \scriptsize
+
+%\end{frame}
+
+
+%COPY AND PASTE FROM HERE
+
+%\begin{enumerate}
+% \item 
+%\end{enumerate}
+
+%\hyperref{link}{text}
+
+%\begin[Language=Python]{lstlisting}
+%#PYTHON CODE HERE
+%\end{lstlisting}
+
+%\lstinputlisting[Language=Python]{ }
+
+%\begin{figure}
+% \center
+% \includegraphics[width= cm]{ }
+% \caption{}
+%\end{figure}
+
+%BIBLIOGRPAHY?
+%\bibliographystyle{ieee}%amsalpha
+%\bibliography{ }
+
+\end{document}
