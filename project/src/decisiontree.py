@@ -28,6 +28,14 @@ class DecisionLeaf(object):
   def __repr__(self):
       return str(self.val)
 
+  def __getitem__(self, key):
+      #TODO fix
+      return self.val
+
+  def __setitem__(self, key, item):
+      #TODO fix
+       self.val = item
+
   def predict(self, predictionset):
     return [self.val for _ in predictionset.index]
 
@@ -122,11 +130,13 @@ class DecisionTree(object):
 
     li = []
     ri = []
+
     for i in input_df.index:
         if input_df[self.feature][i] < self.split:
             li.append(i)
         else:
             ri.append(i)
+
 
     left = input_df.ix[li]
     left_out = outputset.ix[li]
@@ -143,13 +153,13 @@ class DecisionTree(object):
     result = self.left_child.predict(left)
     result.extend(self.right_child.predict(right))
 
-
     result = np.array(result)
     output = np.concatenate((left_out.as_matrix(), right_out.as_matrix()))
     output.flatten()
 
     result = (result - output) ** 2
     result = result[~np.isnan(result)] #drop nans
+
 
     self.mse = result.mean(axis = 0)
 
@@ -158,6 +168,7 @@ class DecisionTree(object):
 
     li = []
     ri = []
+
     for i in predictionset.index:
         if predictionset[self.feature][i] <= self.split:
             li.append(i)
