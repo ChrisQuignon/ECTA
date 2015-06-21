@@ -162,8 +162,9 @@ def par_mse(inp):
     return g
 
 class Evolution():
-    def __init__(self, inputs, outputs, init_tree_depth = 4,  iterations=100, selection_type = '1+1'):
+    def __init__(self, inputs, outputs, init_tree_depth = 4,  iterations=100, selection_type = '1+1', n_samples=100):
         self.inputs = inputs
+        self.n_samples = n_samples
         # print inputs
         self.outputs = outputs
         # self.df = dataframe
@@ -276,7 +277,7 @@ class Evolution():
 
     def evaluation(self):
         #TODO: change n_samples
-        n_samples = 100
+        n_samples = self.n_samples
         #random choices make the fitness function in precise
         rows = np.random.choice(range(self.inputs.shape[1]), n_samples)
 
@@ -334,44 +335,46 @@ class Evolution():
                 print g.genotype.depth(), ' ',
         pass
 
-#
-# def par_wrap(arg):
-#     sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
-#
-#     print 'start', arg
-#
-#     e = Evolution(inputs, outputs,
-#                     iterations = iterations,
-#                     init_tree_depth=init_tree_depth,
-#                     predict_feat='Energie',
-#                     selection_type = selection)
-#     for genome in e.pop:
-#         genome.sigma = sigma
-#         genome.leaf_mutation = leaf_mutation
-#         genome.node_mutation = node_mutation
-#     min_, predict_mse = e.run()
-#
-#     d = {"sigma"           : sigma,
-#          "iterations"      : iterations,
-#          "selection"       : selection,
-#          "init_tree_depth" : init_tree_depth,
-#          "leaf_mutation"   : leaf_mutation,
-#          "node_mutation"   : node_mutation,
-#          'min'             : min_,
-#          'tree'            : e.pop[0].genotype,
-#          'predict_mse'     : predict_mse
-#          }
-#
-#     print 'end', arg
-#     return d
-#
-#
-# # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-# # selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
-# # init_tree_depths = [3, 6]
-# # leaf_mutations = [0.1]
-# # node_mutations = [0.8]
-# # iterations = [100]
+
+def par_wrap(arg):
+    sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation, n_samples = arg
+
+    print 'start', arg
+
+    e = Evolution(inputs, outputs,
+                    iterations = iterations,
+                    init_tree_depth=init_tree_depth,
+                    selection_type = selection,
+                    n_samples = n_samples)
+    for genome in e.pop:
+        genome.sigma = sigma
+        genome.leaf_mutation = leaf_mutation
+        genome.node_mutation = node_mutation
+    min_, predict_mse = e.run()
+
+    d = {"sigma"           : sigma,
+         "iterations"      : iterations,
+         "selection"       : selection,
+         "init_tree_depth" : init_tree_depth,
+         "leaf_mutation"   : leaf_mutation,
+         "node_mutation"   : node_mutation,
+         "n_samples"       : n_samples,
+         'min'             : min_,
+         'tree'            : e.pop[0].genotype,
+         'predict_mse'     : predict_mse
+         }
+
+    print 'end', arg
+    return d
+
+
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
+init_tree_depths = [3, 6, 12]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
+iterations = [100]
+n_samples = [100]#, 1000]
 # leaf_mutations = [0.4]#, 0.2, 0.1, 0.01]
 # node_mutations = [0.8]#, 0.6, 0.4, 0.2]
 #
@@ -379,37 +382,39 @@ class Evolution():
 # iterations = [100]
 # selections = ['1+4']
 # init_tree_depths = [12]
-#
-# args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
-#
-# args = list(product(*args))
-#
-#
-# ds = []
-#
-#
-# # parallel run
-# pool = multiprocessing.Pool(3)
-# ds = pool.map(par_wrap, args)
-# pool.close()
-# pool.join()
-#
-# keys = ["sigma",
-#      "iterations",
-#      "selection",
-#      "init_tree_depth",
-#      "leaf_mutation",
-#      "node_mutation",
-#      'min',
-#      'tree',
-#      'predict_mse'
-# ]
-#
-# with open('img/treerun.csv', 'wb') as output_file:
-#         dict_writer = csv.DictWriter(output_file, keys)
-#         dict_writer.writeheader()
-#         dict_writer.writerows(ds)
+
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+
+args = list(product(*args))
 
 
-e = Evolution(inputs, outputs, init_tree_depth=12, iterations = 100, selection_type = '2+2')
-e.run()
+ds = []
+
+
+# parallel run
+pool = multiprocessing.Pool(3)
+ds = pool.map(par_wrap, args)
+pool.close()
+pool.join()
+
+keys = ["sigma",
+     "iterations",
+     "selection",
+     "init_tree_depth",
+     "leaf_mutation",
+     "node_mutation",
+     "n_samples",
+     'min',
+     'tree',
+     'predict_mse'
+]
+
+with open('img/treerun.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(ds)
+print 'done'
+
+
+# e = Evolution(inputs, outputs, init_tree_depth=12, iterations = 100, selection_type = '2+2')
+# e.run()

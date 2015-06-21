@@ -29,7 +29,7 @@ class DecisionLeaf(object):
       return str(self.val)
 
   def predict(self, predictionset):
-    return [self.val for _ in predictionset.index]
+    return [self.val for _ in predictionset]
 
   def update_mse(self,  input_df, outputset):
     result = self.predict(input_df)
@@ -117,35 +117,30 @@ class DecisionTree(object):
     else:
       self.right_child = right_child
 
-  def update_mse(self, input_df, outputset):
+  def update_mse(self, input_data, outputset):
 
 
     li = []
     ri = []
-    for i in input_df.index:
-        if input_df[self.feature][i] < self.split:
+    for i, val in enumerate(input_data[:, self.feature]):
+        if val <= self.split:
             li.append(i)
         else:
             ri.append(i)
+    right = input_data[:][ri]
+    left = input_data[:][li]
 
-    left = input_df.ix[li]
-    left_out = outputset.ix[li]
-
-
-    right = input_df.ix[ri]
-    right_out = outputset.ix[ri]
-
-    #update_mse recursively
-    #heavy in computation time.
-    # self.left_child.update_mse(left, leftout)
-    # self.right_child.update_mse(right, rightout)
+    left_out = outputset[:][li]
+    right_out = outputset[:][ri]
 
     result = self.left_child.predict(left)
     result.extend(self.right_child.predict(right))
 
-
-    result = np.array(result)
-    output = np.concatenate((left_out.as_matrix(), right_out.as_matrix()))
+    # print result
+    # print left_out
+    # print right_out
+    # result = np.array(result)
+    output = np.concatenate((left_out, right_out))
     output.flatten()
 
     result = (result - output) ** 2
@@ -158,14 +153,13 @@ class DecisionTree(object):
 
     li = []
     ri = []
-    for i in predictionset.index:
-        if predictionset[self.feature][i] <= self.split:
+    for i, val in enumerate(predictionset[:, self.feature]):
+        if val <= self.split:
             li.append(i)
         else:
             ri.append(i)
-
-    left = predictionset.ix[li]
-    right = predictionset.ix[ri]
+    right = predictionset[:][ri]
+    left = predictionset[:][li]
 
     left_val = self.left_child.predict(left)
     right_val = self.right_child.predict(right)
@@ -187,10 +181,14 @@ class DecisionTree(object):
     return 1 + left_size + right_size
 
 
+# inputs = np.loadtxt('data/inputs.txt')
+# outputs = np.loadtxt('data/outputs.txt')
+# val_in = np.loadtxt('data/val_in.txt')
+# val_out = np.loadtxt('data/val_out.txt')
 # #
 # # #TESTING
 # #
-# dT = DecisionTree('Aussentemperatur', 7, 7.7, 64.0)
+dT = DecisionTree(1, 7, 7.7, 64.0)
 # dN = DecisionTree('Vorlauftemperatur', 8.2, 0.2, 64.6)
 # dN[1] = dT
 # dN.update_mse(df[0:100], df.Energie[0:100])
