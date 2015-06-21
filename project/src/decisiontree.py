@@ -28,6 +28,14 @@ class DecisionLeaf(object):
   def __repr__(self):
       return str(self.val)
 
+  def __getitem__(self, key):
+      #TODO fix
+      return self.val
+
+  def __setitem__(self, key, item):
+      #TODO fix
+       self.val = item
+
   def predict(self, predictionset):
     return [self.val for _ in predictionset]
 
@@ -95,14 +103,14 @@ class DecisionTree(object):
         return
 
   def __repr__(self):
-      s = 'if x[' + str(self.feature) + '] <= ' + str(self.split) + ':\n'
+      s = 'if x[' + str(self.feature) + '] <= ' + str(self.split) + ':_'
 
-      for left_line in str(self.left_child).split('\n'):#indent
-          s = s + '  ' + left_line + '\n'
-      s = s + 'else:\n'
+      for left_line in str(self.left_child).split('_'):#indent
+          s = s + '  ' + left_line + '_'
+      s = s + 'else:_'
 
-      for right_line in str(self.right_child).split('\n'):#indent
-          s = s + '  ' + right_line + '\n'
+      for right_line in str(self.right_child).split('_'):#indent
+          s = s + '  ' + right_line + '_'
       return s
 
   def set_left_child(self, left_child):

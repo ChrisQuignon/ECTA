@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from imp import load_source
-from random import randrange, random, choice, gauss, uniform, sample
+from random import randrange, random, choice, gauss, uniform, sample, randint
 import numpy as np
 import pylab
 import pandas as pd
@@ -15,52 +15,64 @@ import multiprocessing
 from itertools import product
 import csv
 
+
 #import dataset
 #equivalent to:
 #import ../helpers/csvimport as helper
-helper = load_source('dsimport', 'helpers/helper.py')
+# helper = load_source('dsimport', 'helpers/helper.py')
+#
+# ds = helper.dsimport()
+#
+# # ds = helper.stretch(ds)
+#
+# df = pd.DataFrame(ds)
+# df.set_index(df.Date, inplace = True)
+# df.Energie.resample('1Min', fill_method="ffill")
+# df = df.resample('1Min')
+# df.Energie.resample('D')
+# # df.interpolate(inplace=True)
+# df.fillna(inplace=True, method='ffill')#we at first forwardfill
+# # df.fillna(inplace=True, method='bfill')#then do a backwards fill
+#
+# df_norm = df.dropna();
+# df_norm = (df_norm - df_norm.min())
+# df_norm = df_norm /df_norm.max()
+# # df = df_norm;
+# train_start = df_norm.index.searchsorted(datetime(2014, 7, 1,0,0))
+# train_end = df_norm.index.searchsorted(datetime(2014, 12, 1,0,0))
+#
+#
+# train_data = df_norm.ix[train_start:train_end]
+# test_data = df_norm.ix[train_end:]
+# test_data = test_data.resample('D')
 
-ds = helper.dsimport()
+#
+# inputs = np.loadtxt('data/inputs.txt')
+# outputs = np.loadtxt('data/outputs.txt')
+# val_in = np.loadtxt('data/val_in.txt')
+# val_out = np.loadtxt('data/val_out.txt')
 
-# ds = helper.stretch(ds)
-
-df = pd.DataFrame(ds)
-df.set_index(df.Date, inplace = True)
-df.Energie.resample('1Min', fill_method="ffill")
-df = df.resample('1Min')
-df.Energie.resample('D')
-# df.interpolate(inplace=True)
-df.fillna(inplace=True, method='ffill')#we at first forwardfill
-# df.fillna(inplace=True, method='bfill')#then do a backwards fill
-
-df_norm = df.dropna();
-df_norm = (df_norm - df_norm.min())
-df_norm = df_norm /df_norm.max()
-# df = df_norm;
-train_start = df_norm.index.searchsorted(datetime(2014, 7, 1,0,0))
-train_end = df_norm.index.searchsorted(datetime(2014, 12, 1,0,0))
-
-
-train_data = df_norm.ix[train_start:train_end]
-test_data = df_norm.ix[train_end:]
-test_data = test_data.resample('D')
+inputs = np.loadtxt('data/inputs_2024.txt')
+outputs = np.loadtxt('data/outputs_2024.txt')
+val_in = np.loadtxt('data/val_in_2024.txt')
+val_out = np.loadtxt('data/val_out_2024.txt')
 
 def bound(value, low=0, high=1):
     diff = high - low
     return (((value - low) % diff) + low)
 
 class Genome():
-    def __init__(self, data, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8, predict_feat = 'Energie'):
-        if predict_feat in data.columns:
-            self.df = data
-            self.predict_feat = predict_feat
-        else:
-            print 'Feature ', predict_feat, ' could not be found.'
-            self.predict_feat = data.columns[0]
-            print 'Feature ', self.predict_feat, ' choosen instead.'
+    def __init__(self, inputs, outputs, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8):
+        # if predict_feat in data.columns:
+        self.inputs = inputs
+        self.outputs = outputs
+        # else:
+        #     print 'Feature ', predict_feat, ' could not be found.'
+        #     self.predict_feat = data.columns[0]
+        #     print 'Feature ', self.predict_feat, ' choosen instead.'
 
-        self.predict_max = self.df[self.predict_feat].max()
-        self.predict_min = self.df[self.predict_feat].min()
+        self.predict_max = max(outputs)
+        self.predict_min = min(outputs)
 
         if isinstance(genotype, DecisionTree):
             self.genotype = genotype
@@ -68,12 +80,13 @@ class Genome():
             print "Genotype ", genotype, 'unknown'
             print "Random leaf set"
 
-            feature  = choice(self.df.columns)
+            feature  = choice(range(self.inputs.shape[0]))
             self.genotype = DecisionLeaf(0.5)
 
         self.sigma = sigma
         self.leaf_mutation = leaf_mutation
         self.node_mutation  = node_mutation
+
 
     def mutate(self):
 
@@ -88,39 +101,51 @@ class Genome():
         # decide whether to mutate leaf or node
         # pick which one
         #   mutate
+        s = self.genotype.size()
 
-        for subtree in self.genotype:
+        # start_time = time.time()
+        # nodes = [i for i in range(s) if isinstance(self.genotype[i], DecisionTree)]
+        # leafs = [i for i in range(s) if isinstance(self.genotype[i], DecisionLeaf)]
+        # end_time = time.time()
+        # print("IDX: %s seconds" %(end_time - start_time))
+        # print leafs
+        # print nodes
+        pos = choice(range(s))
+        subtree = self.genotype[pos]
 
-            if isinstance(subtree, DecisionLeaf):
-                if random() < self.leaf_mutation:
+        # subtree = self.genotype[choice()]
 
-                    sigma = self.sigma * subtree.val
-                    delta = gauss(subtree.val, sigma)
+        if isinstance(subtree, DecisionLeaf):#  and (random() < self.leaf_mutation)
+            # pos = choice(leafs)
+            # print 'leaf mutation, ', pos
+            sigma = self.sigma * subtree.val
+            delta = gauss(subtree.val, sigma)
 
-                    new_val = subtree.val + delta
+            new_val = subtree.val + delta
 
-                    max_val = self.predict_max
-                    min_val = self.predict_min
+            max_val = self.predict_max
+            min_val = self.predict_min
 
-                    new_val = bound(new_val, self.predict_min, self.predict_max)
+            new_val = bound(new_val, self.predict_min, self.predict_max)
 
-                    subtree.val = new_val
+            subtree.val = new_val
+
+        if isinstance(subtree, DecisionTree): #(random() < self.node_mutation) and
+            # pos = choice(nodes)
+            # print 'node mutation, ', pos
+            sigma = self.sigma * subtree.split
+            delta = gauss(subtree.split, sigma)
+
+            new_val = subtree.split + delta
+
+            max_val = max(self.inputs[subtree.feature])
+            min_val = min(self.inputs[subtree.feature])
+
+            new_val = bound(new_val, self.predict_min, self.predict_max)
+
+            subtree.split = new_val
 
 
-            elif isinstance(subtree, DecisionTree):
-                if random() < self.node_mutation:
-
-                    sigma = self.sigma * subtree.split
-                    delta = gauss(subtree.split, sigma)
-
-                    new_val = subtree.split + delta
-
-                    max_val = self.df[subtree.feature].max()
-                    min_val = self.df[subtree.feature].min()
-
-                    new_val = bound(new_val, self.predict_min, self.predict_max)
-
-                    subtree.split = new_val
 
     def fitness(self):
         return self.genotype.mse
@@ -150,16 +175,19 @@ def par_mse(inp):
     return g
 
 class Evolution():
-    def __init__(self, dataframe, init_tree_depth = 4, predict_feat='Energie', iterations=100, selection_type = '1+1'):
-
-        self.df = dataframe
+    def __init__(self, inputs, outputs, init_tree_depth = 4,  iterations=100, selection_type = '1+1', n_samples = 100):
+        self.inputs = inputs
+        # print inputs
+        self.outputs = outputs
+        # self.df = dataframe
         self.iterations = iterations
-        self.predict_feat = predict_feat
+        # self.predict_feat = predict_feat
         self.init_tree_depth = init_tree_depth
+        self.n_samples = n_samples
 
 
-        self.min_pred_val = min(self.df[self.predict_feat])
-        self.max_pred_val = max(self.df[self.predict_feat])
+        self.min_pred_val = min(self.outputs)
+        self.max_pred_val = max(self.outputs)
 
 
         self.selection_type = [c for c in selection_type if not c.isdigit()][0]
@@ -170,7 +198,7 @@ class Evolution():
         ##INITIALIZATION
         for _ in range(0, self.parents):
             tree = self.spawn_tree(self.init_tree_depth)
-            genome = Genome(self.df, tree)
+            genome = Genome(self.inputs, self.outputs, tree)
             self.pop.append(genome)
 
     def spawn_tree(self, depth):
@@ -187,9 +215,10 @@ class Evolution():
             left = self.spawn_tree(depth - 1)
             right = self.spawn_tree(depth - 1)
 
-            feature = choice([ x for x in self.df.columns if x != self.predict_feat])
 
-            split = choice(self.df[feature])
+            feature = choice(range(self.inputs.shape[1]))
+
+            split = choice(self.inputs[feature])
 
             if split == 0.0:#zero splits are hard to mutate
                 split = 0.5
@@ -207,21 +236,29 @@ class Evolution():
         for i in range(self.iterations):
 
             # start_time = time.time()
-            # end_time = time.time()
-            # print("EVAL: %s seconds" %(end_time - start_time))
-
             self.selection()
+            # end_time = time.time()
+            # print("SLCT: %s seconds" %(end_time - start_time))
+
+            # start_time = time.time()
             self.mutation()
+            # end_time = time.time()
+            # print("MUTN: %s seconds" %(end_time - start_time))
+
+            # start_time = time.time()
             fits = self.evaluation()
 
             mins.append(fits[0])
             maxs.append(fits[-1])
             means.append(np.mean(fits))
+            print i, ' of ', self.iterations
 
         #AND THE WINNER IS
         winner = self.pop[0].genotype
-        best_result = winner.predict(test_data)
-        mse = winner.update_mse(test_data, test_data[self.predict_feat])
+
+        #GLOBALS !
+        best_result = winner.predict(val_in)
+        mse = winner.update_mse(val_in, val_out)
 
         #PLOT min man max plot
         # pylab.ylim((0,1))
@@ -246,7 +283,11 @@ class Evolution():
         # pylab.plot_date(x=test_data[self.predict_feat].index, y=best_result, fmt="r-")
         # pylab.plot_date(x=test_data[self.predict_feat].index, y=test_data[self.predict_feat], fmt="g-")
         pylab.plot(best_result, "r-")
-        pylab.plot(test_data[self.predict_feat], "g-")
+        pylab.plot(val_out, "g-")
+
+        # print len(best_result)
+        # print len(val_out)
+
         pylab.tight_layout()
         # pylab.show()
         pylab.savefig('img/best-' + str(min(mins)) + '=' + str(winner.mse) + '-' + str(self.parents) + self.selection_type + str(self.offsprings) + '.png')
@@ -256,19 +297,19 @@ class Evolution():
 
     def evaluation(self):
         #TODO: change n_samples
-        n_samples = 100
+        n_samples = self.n_samples
         #random choices make the fitness function in precise
-        rows = np.random.choice(self.df.index.values, n_samples)
+        rows = np.random.choice(range(self.inputs.shape[1]), n_samples)
 
         #removing duplicates
         rows = list(rows)
         rows = [x for x in rows if not rows.count(x) > 1]
-
-        samples = self.df.ix[rows]
+        #
+        # samples = self.inputs[rows]
 
         #seriell
         for g in self.pop:
-            g.genotype.update_mse(samples, samples[self.predict_feat])
+            g.genotype.update_mse(self.inputs[rows], self.outputs[rows])
 
         # # parallel
         # # drive access is not faster...
@@ -316,15 +357,15 @@ class Evolution():
 
 
 def par_wrap(arg):
-    sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation = arg
+    sigma, iterations, selection, init_tree_depth, leaf_mutation, node_mutation, n_samples = arg
 
     print 'start', arg
 
-    e = Evolution(train_data,
+    e = Evolution(inputs, outputs,
                     iterations = iterations,
                     init_tree_depth=init_tree_depth,
-                    predict_feat='Energie',
-                    selection_type = selection)
+                    selection_type = selection,
+                    n_samples = n_samples)
     for genome in e.pop:
         genome.sigma = sigma
         genome.leaf_mutation = leaf_mutation
@@ -337,9 +378,10 @@ def par_wrap(arg):
          "init_tree_depth" : init_tree_depth,
          "leaf_mutation"   : leaf_mutation,
          "node_mutation"   : node_mutation,
+         "n_samples"       : n_samples,
          'min'             : min_,
-         'tree'            : e.pop[0].genotype,
-         'predict_mse'     : predict_mse
+         'predict_mse'     : predict_mse,
+         'tree'            : e.pop[0].genotype
          }
 
     print 'end', arg
@@ -347,32 +389,34 @@ def par_wrap(arg):
 
 
 # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-# selections = ['2+2',  '4+16', '2,2', '4,16']#, '1,10', '2,2', '2,20', '4,4', '10,10']
+# iterations = [100]
+# selections = ['2+2',  '4+16', '2,2', '4,16']
 # init_tree_depths = [3, 6]
 # leaf_mutations = [0.1]
 # node_mutations = [0.8]
-# iterations = [100]
-leaf_mutations = [0.4]#, 0.2, 0.1, 0.01]
-node_mutations = [0.8]#, 0.6, 0.4, 0.2]
+leaf_mutations = [0.1]#, 0.2, 0.1, 0.01]
+node_mutations = [0.6]#, 0.6, 0.4, 0.2]
+n_samples = [100]
 
 sigmas = [0.2]
-iterations = [100]
-selections = ['1+4']
+iterations = [50]
+selections = ['2+2']
 init_tree_depths = [12]
 
-args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations]
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
 
 args = list(product(*args))
 
 
 ds = []
 
+ds = map(par_wrap, args)
 
-# parallel run
-pool = multiprocessing.Pool(3)
-ds = pool.map(par_wrap, args)
-pool.close()
-pool.join()
+# # parallel run
+# pool = multiprocessing.Pool(6)
+# ds = pool.map(par_wrap, args)
+# pool.close()
+# pool.join()
 
 keys = ["sigma",
      "iterations",
@@ -380,16 +424,16 @@ keys = ["sigma",
      "init_tree_depth",
      "leaf_mutation",
      "node_mutation",
+     "n_samples",
      'min',
-     'tree',
-     'predict_mse'
+     'predict_mse',
+     'tree'
 ]
-
+#
 with open('img/treerun.csv', 'wb') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(ds)
 
-
-# e = Evolution(train_data, 4, iterations = 10, selection_type = '2+2')
+#e = Evolution(train_data, 4, iterations = 10, selection_type = '2+2')
 # e.run()
