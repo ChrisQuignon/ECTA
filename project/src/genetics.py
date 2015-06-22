@@ -296,7 +296,6 @@ class Evolution():
         return min(mins), winner.mse
 
     def evaluation(self):
-        #TODO: change n_samples
         n_samples = self.n_samples
         #random choices make the fitness function in precise
         rows = np.random.choice(range(self.inputs.shape[1]), n_samples)
@@ -308,16 +307,16 @@ class Evolution():
         # samples = self.inputs[rows]
 
         #seriell
-        for g in self.pop:
-            g.genotype.update_mse(self.inputs[rows], self.outputs[rows])
+        # for g in self.pop:
+        #     g.genotype.update_mse(self.inputs[rows], self.outputs[rows])
 
         # # parallel
         # # drive access is not faster...
         # inps = [(p, samples, self.predict_feat) for p in self.pop]
-        # pool = multiprocessing.Pool(len(self.pop))
-        # self.pop = pool.map(par_mse, inps)
-        # pool.close()
-        # pool.join()
+        pool = multiprocessing.Pool(len(self.pop))
+        self.pop = pool.map(lambda g : g.genotype.update_mse(self.inputs[rows], self.outputs[rows]), self.pop)
+        pool.close()
+        pool.join()
 
         self.pop = sorted(self.pop, key = lambda x : x.fitness())
 
@@ -389,18 +388,18 @@ def par_wrap(arg):
 
 
 # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-# iterations = [100]
-# selections = ['2+2',  '4+16', '2,2', '4,16']
+iterations = [200]
+selections = ['2+2', '2,2']#, '2+2', '2,2', '4,16']
 # init_tree_depths = [3, 6]
 # leaf_mutations = [0.1]
 # node_mutations = [0.8]
-leaf_mutations = [0.1]#, 0.2, 0.1, 0.01]
-node_mutations = [0.6]#, 0.6, 0.4, 0.2]
-n_samples = [100]
+leaf_mutations = [0.1]#0.4, 0.2, , 0.01]
+node_mutations = [0.8]#, 0.6, 0.4, 0.2]
+n_samples = [1000]
 
 sigmas = [0.2]
-iterations = [50]
-selections = ['2+2']
+# iterations = [50]
+# selections = ['2+2']
 init_tree_depths = [12]
 
 args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
@@ -408,15 +407,10 @@ args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_m
 args = list(product(*args))
 
 
-ds = []
+# ds = []
 
-ds = map(par_wrap, args)
+# ds = map(par_wrap, args)
 
-# # parallel run
-# pool = multiprocessing.Pool(6)
-# ds = pool.map(par_wrap, args)
-# pool.close()
-# pool.join()
 
 keys = ["sigma",
      "iterations",
@@ -429,8 +423,28 @@ keys = ["sigma",
      'predict_mse',
      'tree'
 ]
+
+with open('img/big_treerun.csv', 'wb') as output_file:
+         dict_writer = csv.DictWriter(output_file, keys)
+         dict_writer.writeheader()
+
+for arg in args:
+    d = par_wrap(arg)
+    with open('img/big_treerun.csv', 'a') as output_file:
+             dict_writer = csv.DictWriter(output_file, keys)
+             dict_writer.writerows([d])
+
+# # parallel run
+# pool = multiprocessing.Pool(6)
+# ds = pool.map(par_wrap, args)F
+# pool.close()
+# pool.join()
 #
-with open('img/treerun.csv', 'wb') as output_file:
+# with open('img/treerun_2ksamples.csv', 'wb') as output_file:
+#         dict_writer = csv.DictWriter(output_file, keys)
+#         dict_writer.writeheader()
+#         dict_writer.writerows(ds)
+with open('img/treerun_2ksamples.csv', 'wb') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(ds)

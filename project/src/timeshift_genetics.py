@@ -16,42 +16,6 @@ from itertools import product
 import csv
 
 
-#import dataset
-#equivalent to:
-#import ../helpers/csvimport as helper
-# helper = load_source('dsimport', 'helpers/helper.py')
-#
-# ds = helper.dsimport()
-#
-# # ds = helper.stretch(ds)
-#
-# df = pd.DataFrame(ds)
-# df.set_index(df.Date, inplace = True)
-# df.Energie.resample('1Min', fill_method="ffill")
-# df = df.resample('1Min')
-# df.Energie.resample('D')
-# # df.interpolate(inplace=True)
-# df.fillna(inplace=True, method='ffill')#we at first forwardfill
-# # df.fillna(inplace=True, method='bfill')#then do a backwards fill
-#
-# df_norm = df.dropna();
-# df_norm = (df_norm - df_norm.min())
-# df_norm = df_norm /df_norm.max()
-# # df = df_norm;
-# train_start = df_norm.index.searchsorted(datetime(2014, 7, 1,0,0))
-# train_end = df_norm.index.searchsorted(datetime(2014, 12, 1,0,0))
-#
-#
-# train_data = df_norm.ix[train_start:train_end]
-# test_data = df_norm.ix[train_end:]
-# test_data = test_data.resample('D')
-
-#
-# inputs = np.loadtxt('data/inputs.txt')
-# outputs = np.loadtxt('data/outputs.txt')
-# val_in = np.loadtxt('data/val_in.txt')
-# val_out = np.loadtxt('data/val_out.txt')
-
 inputs = np.loadtxt('data/inputs_2024.txt')
 outputs = np.loadtxt('data/outputs_2024.txt')
 val_in = np.loadtxt('data/val_in_2024.txt')
@@ -63,13 +27,8 @@ def bound(value, low=0, high=1):
 
 class Genome():
     def __init__(self, inputs, outputs, genotype, sigma = 0.2, leaf_mutation = 0.1, node_mutation = 0.8):
-        # if predict_feat in data.columns:
         self.inputs = inputs
         self.outputs = outputs
-        # else:
-        #     print 'Feature ', predict_feat, ' could not be found.'
-        #     self.predict_feat = data.columns[0]
-        #     print 'Feature ', self.predict_feat, ' choosen instead.'
 
         self.predict_max = max(outputs)
         self.predict_min = min(outputs)
@@ -90,34 +49,39 @@ class Genome():
 
     def mutate(self):
 
-        # TODO:
-        #MAYBE NOT MUTATE EVERY SUBTREE!
-
-        # for subtree in p.genotype:
-        # for i in range(subtree.size()):
-        #     if isinstance(subtree, DecisionTree):
-        #         print subtree[i]
-
-        # decide whether to mutate leaf or node
-        # pick which one
         #   mutate
         s = self.genotype.size()
 
-        # start_time = time.time()
-        # nodes = [i for i in range(s) if isinstance(self.genotype[i], DecisionTree)]
-        # leafs = [i for i in range(s) if isinstance(self.genotype[i], DecisionLeaf)]
-        # end_time = time.time()
-        # print("IDX: %s seconds" %(end_time - start_time))
-        # print leafs
-        # print nodes
         pos = choice(range(s))
         subtree = self.genotype[pos]
 
-        # subtree = self.genotype[choice()]
+        i = 0
+        i_max = 100 #we try 100 times
 
-        if isinstance(subtree, DecisionLeaf):#  and (random() < self.leaf_mutation)
-            # pos = choice(leafs)
-            # print 'leaf mutation, ', pos
+        #NODE MUTATION
+        if random() <= self.node_mutation:
+            while i < i_max and not (isinstance(subtree, DecisionTree)):
+                pos = choice(range(s))
+                subtree = self.genotype[pos]
+                i = i + 1
+            sigma = self.sigma * subtree.split
+            delta = gauss(subtree.split, sigma)
+
+            new_val = subtree.split + delta
+
+            max_val = max(self.inputs[subtree.feature])
+            min_val = min(self.inputs[subtree.feature])
+
+            new_val = bound(new_val, self.predict_min, self.predict_max)
+
+            subtree.split = new_val
+
+        i = 0
+        if random() <= self.leaf_mutation:
+            while i < i_max and not (isinstance(subtree, DecisionLeaf)):
+                pos = choice(range(s))
+                subtree = self.genotype[pos]
+                i = i + 1
             sigma = self.sigma * subtree.val
             delta = gauss(subtree.val, sigma)
 
@@ -130,20 +94,31 @@ class Genome():
 
             subtree.val = new_val
 
-        if isinstance(subtree, DecisionTree): #(random() < self.node_mutation) and
-            # pos = choice(nodes)
-            # print 'node mutation, ', pos
-            sigma = self.sigma * subtree.split
-            delta = gauss(subtree.split, sigma)
-
-            new_val = subtree.split + delta
-
-            max_val = max(self.inputs[subtree.feature])
-            min_val = min(self.inputs[subtree.feature])
-
-            new_val = bound(new_val, self.predict_min, self.predict_max)
-
-            subtree.split = new_val
+        # if isinstance(subtree, DecisionLeaf):#  and (random() < self.leaf_mutation)
+        #     sigma = self.sigma * subtree.val
+        #     delta = gauss(subtree.val, sigma)
+        #
+        #     new_val = subtree.val + delta
+        #
+        #     max_val = self.predict_max
+        #     min_val = self.predict_min
+        #
+        #     new_val = bound(new_val, self.predict_min, self.predict_max)
+        #
+        #     subtree.val = new_val
+        #
+        # if isinstance(subtree, DecisionTree): #(random() < self.node_mutation) and
+        #     sigma = self.sigma * subtree.split
+        #     delta = gauss(subtree.split, sigma)
+        #
+        #     new_val = subtree.split + delta
+        #
+        #     max_val = max(self.inputs[subtree.feature])
+        #     min_val = min(self.inputs[subtree.feature])
+        #
+        #     new_val = bound(new_val, self.predict_min, self.predict_max)
+        #
+        #     subtree.split = new_val
 
 
 
@@ -170,8 +145,8 @@ class Genome():
             self.genotype[own_idx] = deepcopy(partner_subtree)
 
 def par_mse(inp):
-    g, samples, predict_feat = inp
-    g.genotype.update_mse(samples, samples[predict_feat])
+    g, inputs, outputs = inp
+    g.genotype.update_mse(inputs, outputs)
     return g
 
 class Evolution():
@@ -276,12 +251,9 @@ class Evolution():
 
         #PLOT PREDICTION
         pylab.ylim((0,1))
-        # pylab.yscale('log')
         pylab.title(str(self.parents) + self.selection_type + str(self.offsprings) + ': ' + str(min(mins)))
         pylab.xlabel('date')
         pylab.ylabel('prediction')
-        # pylab.plot_date(x=test_data[self.predict_feat].index, y=best_result, fmt="r-")
-        # pylab.plot_date(x=test_data[self.predict_feat].index, y=test_data[self.predict_feat], fmt="g-")
         pylab.plot(best_result, "r-")
         pylab.plot(val_out, "g-")
 
@@ -304,28 +276,21 @@ class Evolution():
         #removing duplicates
         rows = list(rows)
         rows = [x for x in rows if not rows.count(x) > 1]
-        #
-        # samples = self.inputs[rows]
 
         #seriell
-        for g in self.pop:
-            g.genotype.update_mse(self.inputs[rows], self.outputs[rows])
+        # for g in self.pop:
+        #     g.genotype.update_mse(self.inputs[rows], self.outputs[rows])
 
         # # parallel
         # # drive access is not faster...
-        # inps = [(p, samples, self.predict_feat) for p in self.pop]
-        # pool = multiprocessing.Pool(len(self.pop))
-        # self.pop = pool.map(par_mse, inps)
-        # pool.close()
-        # pool.join()
+        inps = [(p, self.inputs[rows], self.outputs[rows]) for p in self.pop]
+        pool = multiprocessing.Pool(len(self.pop))
+        self.pop = pool.map(par_mse, inps)
+        pool.close()
+        pool.join()
 
         self.pop = sorted(self.pop, key = lambda x : x.fitness())
 
-        # print 'POP'
-        # for p in self.pop:
-        #     print 'mse:', "%0.4f" %(p.fitness()), ' size:', p.genotype.size()
-        #     # print p.genotype
-        # print ''
         return [x.fitness() for x in self.pop]
 
 
@@ -381,42 +346,13 @@ def par_wrap(arg):
          "n_samples"       : n_samples,
          'min'             : min_,
          'predict_mse'     : predict_mse,
-         'tree'            : e.pop[0].genotype) 
+         'tree'            : e.pop[0].genotype
          }
 
     print 'end', arg
     return d
 
 
-# sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-# iterations = [100]
-# selections = ['2+2',  '4+16', '2,2', '4,16']
-# init_tree_depths = [3, 6]
-# leaf_mutations = [0.1]
-# node_mutations = [0.8]
-leaf_mutations = [0.1]#, 0.2, 0.1, 0.01]
-node_mutations = [0.6]#, 0.6, 0.4, 0.2]
-n_samples = [100]
-
-sigmas = [0.2]
-iterations = [20]
-selections = ['2+2']
-init_tree_depths = [12]
-
-args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
-
-args = list(product(*args))
-
-
-ds = []
-
-ds = map(par_wrap, args)
-
-# # parallel run
-# pool = multiprocessing.Pool(6)
-# ds = pool.map(par_wrap, args)
-# pool.close()
-# pool.join()
 
 keys = ["sigma",
      "iterations",
@@ -429,11 +365,70 @@ keys = ["sigma",
      'predict_mse',
      'tree'
 ]
+
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+iterations = [100, 200, 400]
+selections = ['2+2',  '4+16', '4+32', '4,16']
+init_tree_depths = [12]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
+n_samples = [500]
+#60 runs
 #
-with open('img/treerun.csv', 'wb') as output_file:
+# sigmas = [0.2]
+# iterations = [200]
+# selections = ['4+16', ]
+# init_tree_depths = [6, 12]
+# leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+# node_mutations = [0.8, 0.6, 0.4, 0.2]
+# n_samples = [100, 500, 1000]
+# #96 runs
+
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+
+args = list(product(*args))
+
+
+with open('img/select_run.csv', 'wb') as output_file:
         dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
         dict_writer.writeheader()
-        dict_writer.writerows(ds)
 
-#e = Evolution(train_data, 4, iterations = 10, selection_type = '2+2')
-# e.run()
+for arg in args:
+    d = par_wrap(arg)
+    with open('img/select_run.csv', 'a') as output_file:
+            dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+            dict_writer.writerows(ds)
+
+
+# sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+# iterations = [100, 200, 400]
+# selections = ['2+2',  '4+16', '4+32', '4,16']
+# init_tree_depths = [12]
+# leaf_mutations = [0.1]
+# node_mutations = [0.8]
+# n_samples = [500]
+# #60 runs
+#
+sigmas = [0.2]
+iterations = [200]
+selections = ['4+16', ]
+init_tree_depths = [6, 12]
+leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+node_mutations = [0.8, 0.6, 0.4, 0.2]
+n_samples = [100, 500, 1000]
+#96 runs
+
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+
+args = list(product(*args))
+
+
+with open('img/mutation_run.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+        dict_writer.writeheader()
+
+for arg in args:
+    d = par_wrap(arg)
+    with open('img/mutation_run.csv', 'a') as output_file:
+            dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+            dict_writer.writerows(ds)
