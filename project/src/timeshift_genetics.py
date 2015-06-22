@@ -397,7 +397,7 @@ for arg in args:
     d = par_wrap(arg)
     with open('img/select_run.csv', 'a') as output_file:
             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
-            dict_writer.writerows(ds)
+            dict_writer.writerows([d])
 
 
 # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
@@ -431,4 +431,4 @@ for arg in args:
     d = par_wrap(arg)
     with open('img/mutation_run.csv', 'a') as output_file:
             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
-            dict_writer.writerows(ds)
+            dict_writer.writerows([d])
