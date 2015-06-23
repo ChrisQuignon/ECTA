@@ -1,0 +1,261 @@
+\documentclass{beamer}
+\usetheme{Pittsburgh} 
+%\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{default}
+\usepackage[procnames]{listings}
+\usepackage{graphicx}
+%\usepackage[toc,page]{appendix}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{color}
+%\usepackage{csvsimple}
+\usepackage{float}
+\usepackage[T1]{fontenc}
+
+
+%Bibliogrpahy?
+%\usepackage{bibentry}
+%\nobibliography*
+%\bibentry{ }
+
+%Python
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{0,0,113}
+\definecolor{red}{RGB}{160,0,0}
+\definecolor{green}{RGB}{0,150,0}
+\lstset{language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{keywords},
+    commentstyle=\color{comments},
+    stringstyle=\color{red},
+    identifierstyle=\color{green},
+    breaklines = true,
+    columns=fullflexible,
+    %Numbering and tabs
+    %numbers=left,
+    %numberstyle=\tiny\color{gray},
+    %stepnumber=2,
+    %numbersep=1em,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false}
+
+
+\begin{document}
+
+\title{Predicting energy consumption of a heat pump}
+\subtitle{by evolving decision trees}
+\author{
+  Quignon, Christophe \\
+  %Familyname, Name
+} 
+\institute{Hochschule Bonn Rhein Sieg}
+\date{\today}
+
+\begin{frame}
+\titlepage{}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Problem}
+\framesubtitle{}
+
+\begin{block}{Idea}
+Controlling heat pumps could greatly benefit by a correct prediction of the energy consumption of the heatpump.
+\end{block}
+\hbox{}
+
+\begin{block}{Data}
+The Recogizer GmbH provided me a dataset of 4 sensor reading, three weather indicators and an accumulated energy consumption. The data spans the time between July 2014 to February 2015, with a total of 242 days and roughly 2.787.848 dates.
+\end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Idea}
+\framesubtitle{}
+
+
+\begin{block}{Basis}
+In the course "Learning and Adaptivity" a random forest was trained to predict the energy consumption. The single Decisiontrees randomly split the data.\\
+This randomness could benefit from a genetic optimization, called Genetic Algorithm based Random Forests (GARF) as suggested in \cite{bader2012garf}
+\end{block}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Preprocessing}
+\framesubtitle{}
+
+
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[height=0.66\linewidth]{img/LA-regpred.png}
+  \caption{Input(green) and output (red) of timeshifted data for prediction.}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+	\begin{itemize}
+	\item Normalization
+	\item Correlation analysis
+	\item Drop precipitation
+	\item Include day of the year
+	\item Subsampling
+	\item Timeshifting\cite{vafaeipour2014application}
+	\end{itemize}
+\end{minipage}%
+\end{figure}
+\hbox{}
+16561 samples in the training and 557 samples in the prediction set. Both with 657 "dimensions" as input and one as output.
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Algorithm}
+\framesubtitle{}
+
+\begin{block}{Evolutionary Strategy}
+based on the vehicle-assignment\\
+\hbox{}
+\begin{itemize}
+\item Free selection choice
+\item Elitism
+\item Genotype is a self implemented Decisiontree
+\item Tree depth limit of 60
+\item Fitness is the MSE of a random subsample of the training data
+\item Mutation of split and prediction values with with a Gaussian
+\item One static Sigma for the split and prediction value
+\item Different mutation rates for nodes and leafs
+\item Crossover by inserting subtrees
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Parameters}
+\framesubtitle{}
+\begin{block}{Selection run}
+\begin{lstlisting}[language=Python]
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+iterations = [100, 200, 400]
+selections = ['2+2',  '4+16', '4+32', '4,16']
+init_tree_depths = [12]
+leaf_mutations = [0.1]
+node_mutations = [0.8]
+n_samples = [500]
+#60 runs
+\end{lstlisting}
+\end{block}
+
+\begin{block}{Mutation run}
+\begin{lstlisting}[language=Python]
+sigmas = [0.2]
+iterations = [200]
+selections = ['4+16']
+init_tree_depths = [6, 12]
+leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+node_mutations = [0.8, 0.6, 0.4, 0.2]
+n_samples = [100, 500, 1000]
+#96 runs
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Analysis}
+
+\begin{itemize}
+\item One local minima found after a few iterations
+\item No steady improvement in any of 400 different runs
+
+\begin{itemize}
+\item Regular Regression
+\item Boston dataset
+\item Full preprocessed data
+\end{itemize}
+
+\item Fitness value did not match the prediction value
+\item Fitness value is not stable
+\end{itemize}
+
+\hbox{}
+\hbox{}
+
+\begin{quote}
+\hfill Je planmäßiger der Mensch vorgeht,\\
+\hfill um so wirkungsvoller trifft ihn der Zufall.\\
+\end{quote}
+\hfill \small{- Friedrich Dürrenmatt}
+
+\end{frame}
+
+
+%BIBLIOGRPAHY?
+\begin{frame}
+\frametitle{Reference}
+
+\bibliographystyle{plain}%amsalpha
+\bibliography{bib.bib}
+
+\end{frame}
+
+%CONTENTS
+%NOTES
+
+%\begin{frame}[fragile, allowframebreaks]
+%\frametitle{}
+%\framesubtitle{}
+%give your initials so we know whom to bug
+%tabulars and long boring stuff is in \scriptsize
+
+%\end{frame}
+
+
+%COPY AND PASTE FROM HERE
+
+%\begin{enumerate}
+% \item 
+%\end{enumerate}
+
+%\hyperref{link}{text}
+
+%\lstinputlisting[Language=Python]{ }
+
+
+
+
+%\begin{figure}[H]
+%  \center
+%  \includegraphics[height=0.33\linewidth]{img/LA-regpred.png}
+%  \caption{Correlation of the datasets.}
+%  \label{fig:}
+%\end{figure}
+
+%\begin{figure}[H]
+%\centering
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[height=0.6\linewidth]{img/LA-regpred.png}
+%  %\caption{}
+%  %\label{fig:}
+%\end{minipage}%
+%\begin{minipage}{.5\textwidth}
+%  \centering
+%  \includegraphics[height=0.6\linewidth]{img/LA-regpred.png}
+%  %\caption{}
+%  %\label{fig:} 
+%\end{minipage}
+%%\caption{}
+%\end{figure}
+
+
+\end{document}
