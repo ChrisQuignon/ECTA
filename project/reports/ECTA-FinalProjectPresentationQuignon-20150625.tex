@@ -178,6 +178,8 @@ n_samples = [100, 500, 1000]
 \item No steady improvement in any of 400 different runs
 
 \begin{itemize}
+\item All likely parameters
+\item Some unlikely parameters 
 \item Regular Regression
 \item Boston dataset
 \item Full preprocessed data
@@ -187,14 +189,60 @@ n_samples = [100, 500, 1000]
 \item Fitness value is not stable
 \end{itemize}
 
-\hbox{}
-\hbox{}
+%\hbox{}
+%\hbox{}
 
-\begin{quote}
-\hfill Je planmäßiger der Mensch vorgeht,\\
-\hfill um so wirkungsvoller trifft ihn der Zufall.\\
-\end{quote}
-\hfill \small{- Friedrich Dürrenmatt}
+%\begin{quote}
+%\hfill Je planmäßiger der Mensch vorgeht,\\
+%\hfill um so wirkungsvoller trifft ihn der Zufall.\\
+%\end{quote}
+%\hfill \small{- Friedrich Dürrenmatt}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Analysis}
+\framesubtitle{The nasty truth...}
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/mse_comparison_all.png}
+  \caption{Parameters, sorted by predicted MSE}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/param_correlation.png}
+  \caption{Parameter correlation.}
+\end{minipage}%
+\end{figure}
+\hbox{}
+The better the fitness value, the worse the prediction.
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+\frametitle{Comparison}
+\framesubtitle{}
+
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=1.\linewidth]{img/LA-predict-energy--0p890.png}
+  \caption{Random Forest}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/best-0p0361712883366=0p00160806666405-2,2.png}
+  \caption{Decision Tree}
+\end{minipage}%
+\end{figure}
+\hbox{}
+\dots
 
 \end{frame}
 
