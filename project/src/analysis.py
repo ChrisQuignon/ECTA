@@ -3,11 +3,13 @@ from matplotlib import pylab
 import numpy as np
 
 
+# mutate_run = pd.DataFrame.from_csv('img/overnight/mutation_run.csv', sep = ';', index_col=None)
+# selection_run = pd.DataFrame.from_csv('img/overnight/select_run.csv', sep = ';', index_col=None)
 # mutate_run = pd.DataFrame.from_csv('img/last_runs/mutation_run.csv', sep = ';', index_col=None)
 # selection_run = pd.DataFrame.from_csv('img/last_runs/select_run.csv', sep = ';', index_col=None)
 #
 # all_runs = mutate_run.append(selection_run)
-all_runs = pd.DataFrame.from_csv('img/statsrun.csv', sep = ',', index_col=None)
+all_runs = pd.DataFrame.from_csv('img/statsrun/statsrun.csv', sep = ',', index_col=None)
 
 all_runs=all_runs.rename(columns = {'min':'Minimal MSE',
                                   'leaf_mutation' : 'Leaf mutation rate',
