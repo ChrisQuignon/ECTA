@@ -175,7 +175,6 @@ class DecisionTree(object):
     result = []
     result.extend(left_val)
     result.extend(right_val)
-
     return result
 
   def depth(self):

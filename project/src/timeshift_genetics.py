@@ -12,7 +12,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 import time
 import multiprocessing
-from itertools import product
+from itertools import product, chain
 import csv
 
 
@@ -247,7 +247,10 @@ class Evolution():
         #TODO: change n_samples
         n_samples = self.n_samples
         #random choices make the fitness function in precise
-        rows = np.random.choice(range(self.inputs.shape[1]), n_samples)
+        # rows = np.random.choice(range(self.inputs.shape[1]), n_samples)
+
+        #TODO FIX:
+        rows = sample(range(self.inputs.shape[0]), n_samples)
 
         #removing duplicates
         rows = list(rows)
@@ -343,7 +346,37 @@ keys = ["sigma",
 ]
 
 
+sigmas = [0.05]
+iterations = [100]
+selections = ['12,50']
+init_tree_depths = [12]
+leaf_mutations = [0.2]
+node_mutations = [0.8]
+n_samples = [200]
+#1:10
 
+args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+
+args = list(product(*args))
+# args = list(chain(args * 7))
+
+
+
+# # parallel run
+pool = multiprocessing.Pool(1)
+ds = pool.map(par_wrap, args)
+pool.close()
+pool.join()
+
+with open('img/bigrun_2.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, delimiter=';', fieldnames = keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(ds)
+
+
+#
+#
+#
 # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
 # iterations = [100, 200, 400]
 # selections = ['2+2',  '4+16', '4+32', '4,16']
@@ -366,6 +399,17 @@ keys = ["sigma",
 #
 # args = list(product(*args))
 #
+# #BUGGY UP TO
+# # end (0.05, 400, '2+2', 12, 0.1, 0.8, 500)
+# # start (0.05, 400, '4+16', 12, 0.1, 0.8, 500)
+#
+# #FIXED up to
+# # end (0.4, 400, '4+32', 12, 0.1, 0.8, 500)
+# # start (0.4, 400, '4,16', 12, 0.1, 0.8, 500)
+#
+#
+#
+#
 #
 # with open('img/select_run.csv', 'wb') as output_file:
 #         dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
@@ -377,36 +421,90 @@ keys = ["sigma",
 #             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
 #             dict_writer.writerows([d])
 
+#
+# # sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+# # iterations = [100, 200, 400]
+# # selections = ['2+2',  '4+16', '4+32', '4,16']
+# # init_tree_depths = [12]
+# # leaf_mutations = [0.1]
+# # node_mutations = [0.8]
+# # n_samples = [500]
+# # #60 runs
+# #
+# sigmas = [0.2]
+# iterations = [200]
+# selections = ['4+16']
+# init_tree_depths = [6, 12]
+# leaf_mutations = [0.4, 0.2, 0.1, 0.01]
+# node_mutations = [0.8, 0.6, 0.4, 0.2]
+# n_samples = [100, 500, 1000]
+# #96 runs
+#
+# args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+#
+# args = list(product(*args))
+#
+#
+# with open('img/mutation_run.csv', 'wb') as output_file:
+#         dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#         dict_writer.writeheader()
+#
+# for arg in args:
+#     d = par_wrap(arg)
+#     with open('img/mutation_run.csv', 'a') as output_file:
+#             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#             dict_writer.writerows([d])
 
-# sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
-# iterations = [100, 200, 400]
-# selections = ['2+2',  '4+16', '4+32', '4,16']
+
+
+#
+# sigmas = [0.2]
+# iterations = [100, 200, 400, 800]
+# selections = ['2+2', '2,2']
 # init_tree_depths = [12]
 # leaf_mutations = [0.1]
 # node_mutations = [0.8]
-# n_samples = [500]
-# #60 runs
+# n_samples = [100, 500, 1000]
+# #96 runs
 #
-sigmas = [0.2]
-iterations = [200]
-selections = ['4+16']
-init_tree_depths = [6, 12]
-leaf_mutations = [0.4, 0.2, 0.1, 0.01]
-node_mutations = [0.8, 0.6, 0.4, 0.2]
-n_samples = [100, 500, 1000]
-#96 runs
+# args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+#
+# args = list(product(*args))
+#
+#
+# with open('img/long_run.csv', 'wb') as output_file:
+#         dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#         dict_writer.writeheader()
+#
+# for arg in args:
+#     d = par_wrap(arg)
+#     with open('img/long_run.csv', 'a') as output_file:
+#             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#             dict_writer.writerows([d])
+#
 
-args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
 
-args = list(product(*args))
-
-
-with open('img/mutation_run.csv', 'wb') as output_file:
-        dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
-        dict_writer.writeheader()
-
-for arg in args:
-    d = par_wrap(arg)
-    with open('img/mutation_run.csv', 'a') as output_file:
-            dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
-            dict_writer.writerows([d])
+#
+# sigmas = [0.2]
+# iterations = [400]
+# selections = ['2,200']
+# init_tree_depths = [24]
+# leaf_mutations = [0.1]
+# node_mutations = [0.8]
+# n_samples = [500, 1000]
+# #96 runs
+#
+# args = [sigmas, iterations, selections, init_tree_depths, leaf_mutations, node_mutations, n_samples]
+#
+# args = list(product(*args))
+#
+#
+# with open('img/big_run.csv', 'wb') as output_file:
+#         dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#         dict_writer.writeheader()
+#
+# for arg in args:
+#     d = par_wrap(arg)
+#     with open('img/big_run.csv', 'a') as output_file:
+#             dict_writer = csv.DictWriter(output_file, delimiter=';',fieldnames = keys)
+#             dict_writer.writerows([d])
