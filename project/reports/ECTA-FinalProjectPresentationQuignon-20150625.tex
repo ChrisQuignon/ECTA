@@ -144,7 +144,7 @@ based on the vehicle-assignment\\
 \framesubtitle{}
 \begin{block}{Selection run}
 \begin{lstlisting}[language=Python]
-sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]#
+sigmas = [0.4, 0.2, 0.1, 0.05, 0.005]
 iterations = [100, 200, 400]
 selections = ['2+2',  '4+16', '4+32', '4,16']
 init_tree_depths = [12]
@@ -175,7 +175,7 @@ n_samples = [100, 500, 1000]
 
 \begin{itemize}
 \item One local minima found after a few iterations
-\item No steady improvement in any of 400 different runs
+\item No steady improvement in any of 1.000 different runs
 
 \begin{itemize}
 \item All likely parameters
@@ -185,18 +185,10 @@ n_samples = [100, 500, 1000]
 \item Full preprocessed data
 \end{itemize}
 
-\item Fitness value did not match the prediction value
 \item Fitness value is not stable
+\item Fitness value did not match the prediction value
 \end{itemize}
 
-%\hbox{}
-%\hbox{}
-
-%\begin{quote}
-%\hfill Je planmäßiger der Mensch vorgeht,\\
-%\hfill um so wirkungsvoller trifft ihn der Zufall.\\
-%\end{quote}
-%\hfill \small{- Friedrich Dürrenmatt}
 
 \end{frame}
 
@@ -208,7 +200,7 @@ n_samples = [100, 500, 1000]
 
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{img/mse_comparison_all.png}
+  \includegraphics[width=.8\linewidth]{img/mse_comparison.png}
   \caption{Parameters, sorted by predicted MSE}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
@@ -218,10 +210,71 @@ n_samples = [100, 500, 1000]
 \end{minipage}%
 \end{figure}
 \hbox{}
+\hbox{}
 The better the fitness value, the worse the prediction.
 
 \end{frame}
 
+
+\begin{frame}[fragile]
+\frametitle{Analysis}
+\framesubtitle{Fixed}
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/paramruns_mse.png}
+  \caption{Parameters, sorted by predicted MSE}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/paramruns_corellation.png}
+  \caption{Parameter correlation.}
+\end{minipage}%
+\end{figure}
+
+\hbox{}
+It's the sampling.
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Analysis}
+\framesubtitle{The Winner}
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/0p0277-2p2.png}
+  \caption{Fitness progress of the lowest final MSE 0.0277.}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/best-0p0277=0p05678-2+2.png}
+  \caption{Prediction of the lowest MSE with an actual MSE of 0.0568.}
+\end{minipage}%
+\end{figure}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Analysis}
+\framesubtitle{The Best}
+\begin{figure}[H]
+
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/0p0537-2+2.png}
+  \caption{Fitness progress of the lowest final MSE 0.0537.}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{img/best-0p05374=0p0019-2+2.png}
+  \caption{Prediction of the lowest MSE with an actual MSE of 0.0019.}
+\end{minipage}%
+\end{figure}
+\end{frame}
 
 
 \begin{frame}[fragile]
@@ -229,20 +282,19 @@ The better the fitness value, the worse the prediction.
 \framesubtitle{}
 
 \begin{figure}[H]
-
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=1.\linewidth]{img/LA-predict-energy--0p890.png}
-  \caption{Random Forest}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-  \includegraphics[width=.8\linewidth]{img/best-0p0361712883366=0p00160806666405-2,2.png}
-  \caption{Decision Tree}
-\end{minipage}%
+  \center
+  \includegraphics[width=.6\linewidth]{img/LA-predict-energy--0p890.png}
+  \caption{Prediction of the Random Forest.}
 \end{figure}
+
 \hbox{}
-\dots
+\hbox{}
+
+\begin{quote}
+\hfill Je planmäßiger der Mensch vorgeht,\\
+\hfill um so wirkungsvoller trifft ihn der Zufall.\\
+\end{quote}
+\hfill \small{- Friedrich Dürrenmatt}
 
 \end{frame}
 
