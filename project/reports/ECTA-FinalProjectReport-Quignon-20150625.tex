@@ -176,7 +176,7 @@ Despite a wide range of parameters, it was not possible to gain a steady improve
 %precipitation
 %DOY
 
-\section{Sampling}
+\subsection{Sampling}
 %Subssampling and its implication on prediction, samples, dimensionality and 
 
 \subsection{Timeshift}
@@ -263,30 +263,61 @@ Despite a wide range of parameters, it was not possible to gain a steady improve
 %include weather forecast
 %personal note: I learned a lot.
 
-
-\subsubsection{Subsubsection Heading Here}
-Subsubsection text here.
+%TIMESHIFT
 \begin{figure}[!t] 
-
 \centering 
-
-\includegraphics[width=0.45\textwidth]{LA-regpred} 
-
-\caption{Sample caption} 
-
-\label{fig:target_area} 
-
+\includegraphics[width=0.45\textwidth]{LA-regpred.png} 
+\caption{Input(green) and output (red) of timeshifted data for prediction.} 
+\label{fig:timeshift} 
 \end{figure}
 
+%MSE COMPARISON
+\begin{figure}[!t] 
+\centering 
+\includegraphics[width=0.45\textwidth]{mse_comparison.png} 
+\caption{Comparison of the general MSE (fitness) and the prediction MSE.} 
+\label{fig:mse_comparison} 
+\end{figure}
+
+%PARAM CORRELATION
+\begin{figure}[!t] 
+\centering 
+\includegraphics[width=0.45\textwidth]{paramruns_corellation.png} 
+\caption{Parameter correlation.} 
+\label{fig:param_correlation} 
+\end{figure}
+
+%WINNER
 \begin{figure*}[!t]
-\centerline{\subfloat[CASE I]{\includegraphics[width=2.5in]{LA-regpred}%
-\label{fig_first_case}}
+\centerline{\subfloat[Fitness progress of the lowest final MSE 0.0277.]{\includegraphics[width=2.5in]{0p0277-2p2.png}%
+\label{fig:winner_fitness}}
 \hfil
-\subfloat[CASE II]{\includegraphics[width=2.5in]{LA-regpred}%
-\label{fig_second_case}}}
-\caption{Simulation results}
-\label{fig_sim}
+\subfloat[Prediction of the lowest MSE with an actual MSE of 0.0568.]{\includegraphics[width=2.5in]{best-0p0277=0p05678-2+2.png}%
+\label{fig:winner_prediction}}}
+\caption{Analysis of the lowest final MSE of all runs.}
+\label{fig:winner}
 \end{figure*}
+
+
+%BEST
+\begin{figure*}[!t]
+\centerline{\subfloat[Fitness progress of the lowest final MSE 0.0537.]{\includegraphics[width=2.5in]{0p0537-2+2.png}%
+\label{fig:best_fitness}}
+\hfil
+\subfloat[Prediction of the lowest MSE with an actual MSE of 0.0019.]{\includegraphics[width=2.5in]{best-0p05374=0p0019-2+2.png}%
+\label{fig:best_prediction}}}
+\caption{Analysis of the lowest predicted MSE of all runs.}
+\label{fig:best}
+\end{figure*}
+
+
+%RANDOM FOREST PREDICTION
+\begin{figure}[!t] 
+\centering 
+\includegraphics[width=0.45\textwidth]{LA-predict-energy--0p890.png} 
+\caption{Prediction of the Random Forest.} 
+\label{fig:random_forest} 
+\end{figure}
 
 
 % An example of a floating table. Note that, for IEEE style tables, the 
