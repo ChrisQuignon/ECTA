@@ -1,14 +1,3 @@
-
-%% This work is distributed under the LaTeX Project Public License (LPPL)
-%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
-%% distributed and modified. A copy of the LPPL, version 1.3, is included
-%% in the base LaTeX documentation of all distributions of LaTeX released
-%% 2003/12/01 or later.
-%% Retain all contribution notices and credits.
-%% ** Modified files should be clearly indicated as such, including  **
-%% ** renaming them and changing author support contact information. **
-%%
-
 \documentclass[conference]{IEEEtran}
 
 \usepackage[T1]{fontenc} 
@@ -126,45 +115,35 @@
 
 
 \begin{document}
-%
-% paper title
-% can use linebreaks \\ within to get better formatting as desired
+
 \title{Predicting energy consumption of a heat pump
 by evolving decision trees.}
 
-
-% author names and affiliations
-% use a multiple column layout for up to three different
-% affiliations
 \author{\IEEEauthorblockN{Christophe Quignon}
 \IEEEauthorblockA{Bonn-Rhein-Sieg University of Applied Sciences\\
 Email: christophe.quignon@smail.inf.h-brs.de}
 }
 
-% make the title area
 \maketitle
 
 
 \begin{abstract}
 In this project, I explored the capabilities of evolving decision trees to predict the energy consumption of a heat pump. Data from a real heat pump was recorded in a timespan of 242 days. From this data approximately 16.561 sample sets of input an output where used to evolve a decision tree. After that 557 samples (8 days) where used to validate the prediction.\\
 The algorithm evolved a decision tree by mutation either the split value of a node or the predicted outcome. As crossover method, a node or leaf of one tree was replaced by a node or leaf of another tree.\\
-Despite a wide range of parameters, it was not possible to gain a steady improvement of prediction. 
+Despite a wide range of parameters, it was not possible to gain a steady improvement of prediction. It could be shown that this was not due to a bad parameter choice but is most likely due to the unstable fitness function. This may be overcome by several measures including a more performant implementation.
 \end{abstract}
 \IEEEpeerreviewmaketitle
 
 
 
 \section{Problem}
-%general paragraph on heat pumps
+
 Heat pumps are a sustainable way to transfer thermal energy into out away from builds to keep a comfortable temperature. But to operate a heating pump is not a trivial task, different building distribute the heat differently and weather with its chaotic nature has a major influence on the temperature flow. With an accurate prediction of the energy consumption, one can increase their efficiency and operating cost.\\
-%what do we want to do
 This project explored the possibilities to enhance on a regular trained random forest. The idea is to optimize the random choice of the decision value and the random prediction value to increase its predictive power.\\
-%choice of algorithm
 For the optimization, an evolutionary strategy was chosen to modify the decision and prediction values. As a fitness estimate, a random subset of input and prediction values was drawn and the mean squared error (MSE) calculated and minimized. 
 
-\subsection{Former work}%TODO RENAME
+\subsection{Former work}
 \label{sec:formerwork}
-%what was done in LA?
 In a different project for the "Learning and Adaptivity course", a random forest was trained on the same dataset. After several optimizations, an $R^{2}$ score of $0.89$ was achieved. The reason to use a random forest was that from the decision trees, general "human readable" rules could be extracted to control the heat pumps. As of now, this happens with simple thresholds on values and resulting actions, which exactly matches decision trees.
 
 
@@ -198,27 +177,20 @@ The total energy consumption of the system  in watt hours is added up every day.
 \subsection{Evolving decision trees}
 \label{sec:GARF}
 
-%short summary of decision trees
-To have a basic understanding of decision trees, I will give a short overview of their working. For further insight, several tutorials like /cite{quinlan1986induction} are available. Here it is sufficient to know, how the prediction step of one branch is working. Given an n-dimensional input, a decision tree node splits the data into two subsets. The split position is in one random dimension of the input set and one random value is this dimension. The two sets are then passed to the next level where the same thing happens along a possibly different dimension with possibly different random values. At the leafs of the tree finally stand random prediction values.\\
-%own decision tree implementation
-
-%Why evolution and not genetics?
+To have a basic understanding of decision trees, I will give a short overview of their working. For further insight, several tutorials like \cite{quinlan1986induction} are available. Here it is sufficient to know, how the prediction step of one branch is working. Given an n-dimensional input, a decision tree node splits the data into two subsets. The split position is in one random dimension of the input set and one random value is this dimension. The two sets are then passed to the next level where the same thing happens along a possibly different dimension with possibly different random values. At the leafs of the tree finally stand random prediction values.\\
 A first random decision tree is not expected to produce a meaningful output, but small changes in good decision trees are likely to drive the fitness value towards the optimal fitness value. In summation, the problem is favouring small increments on existing good solutions over exploring the whole solution space. Thus an evolutionary strategy was chosen over a genetic algorithm.
-
-%Link to GARF
 The idea to then optimize the decision tree with a genetic algorithm was first formulated in \cite{bader2012garf} where the idea is called Genetic Algorithm based Random Forests (GARF).
 %TODO option to write more
 
 
 \section{Preprocessing}
-%normalization
+
 As with every data, preprocessing was necessary to gain a good prediction. In this case, the raw values of the sensor where normalized between zero (minimal value) and one(maximum value).
-%subsampling
+
 The single dimensions where all sub sampled to the same frequency avoid implicit weighting by having more samples of one dimension then the other.
 
-%precipitation drop
-In former work (See section \ref{sec:formerwork}) it was experimentally shown that the precipitation did not contribute to the performance of any learning algorithm, because its values where to sparse. Thus it also was not included in this approach.  
-%DOY add
+
+In former work (See section \ref{sec:formerwork}) it was experimentally shown that the precipitation did not contribute to the performance of any learning algorithm, because its values where to sparse. Thus it also was not included in this approach.
 On the other hand, including additional information about the time in form of the day of the year increased the prediction accuracy of all analysed algorithms and thus also was included in this approach. This allows for a comprehensive prediction comparison, because both algorithms start with the very data inputs. It however is not clear how or whether at all a decision tree could exploit the day of the year.
 
 %\subsection{Correlation}
@@ -226,79 +198,49 @@ On the other hand, including additional information about the time in form of th
 %Feature merge not done (temperature delta)
 %As part of the preprocessing, a further analysis of the data was done. One mayor insight was gained by the correlation of the single input dimensions. On the 
 
-%\subsection{Timeshift}
-%Seasonal decomposition
-%Heat pumps are strongly affected by the weather and thus have a seasonal component to them. In every dimension, one can clearly identify the day in form of a low temperature night, a steep decline when the sun rises and a steady cooling once it set. Additionally this effect accumulates during the warm month and is less visible in the cold month. The seasonal decomposition by \cite{loess} made it possible to clearly identify this seasonal trends and extract it.\\
-%time delay of the system itself.
-%With the general seasonal information of one day the delay of the system could be found. The daily progress of every parameter was convoluted with the to predict energy. Thus the time delay of every parameter could be identified by the time delay of maximum overlap with the energy. For internal measurements like input and output temperature was naturally low (7 minutes) and could be logically reasoned as the time the liquid need to travel through the system. The most influential parameter (outside temperature) was delayed by three hours. This means that the structural features of the building hold back temperature change for as long as three hours. This maximal time shift defined the time frame for every input which was set to four hours.\\
+\subsection{Seasonal decomposition}
+Heat pumps are strongly affected by the weather and thus have a seasonal component to them. In every dimension, one can clearly identify the day in form of a low temperature night, a steep decline when the sun rises and a steady cooling once it set. Additionally this effect accumulates during the warm month and is less visible in the cold month. The seasonal decomposition by \cite{loess} made it possible to clearly identify this seasonal trends and extract it.\\
+With the general seasonal information of one day the delay of the system could be found. The daily progress of every parameter was convoluted with the to predict energy. Thus the time delay of every parameter could be identified by the time delay of maximum overlap with the energy. For internal measurements like input and output temperature was naturally low (7 minutes) and could be logically reasoned as the time the liquid need to travel through the system. The most influential parameter (outside temperature) was delayed by three hours. This means that the structural features of the building hold back temperature change for as long as three hours. This maximal time shift defined the minimal time frame for every input. In this case, a larger input frame of 24hours was chosen to maximize the information available.
 
 
-
-
-%general idea of maximum data use
-It also was important to us to use the maximum of information along the dimensions. Thus we did not use general regression where from a set of input dimensions a different output dimension at the same time is learned. This would mean that the learning algorithm would learn how to calculate the current energy given all other measurements. But the energy consumption at the same moment is known and thus not necessary to learn. Instead the current energy should also be used as an input and the energy of the next day is the anticipated output of the function. Thus the input vector is every dimension at the current time point and the to predict output is the energy consumed on the next day. Thus the algorithm can use the current energy as a state which already is a good estimate for future consumption.\\
-
-%use of weather forecast
+\subsection{Sliding window approach}
+It also was important to us to use the maximum of information along the dimensions. Thus we did not use general regression where from a set of input dimensions a different output dimension at the same time is learned. This would mean that the learning algorithm would learn how to calculate the current energy given all other measurements. But the energy consumption at the same moment is known and thus not necessary to learn. Instead the current energy should also be used as an input and the energy of the next day is the anticipated output of the function. Thus the input vector is every dimension at the current time point and the to predict output is the energy consumed on the next day. Thus the algorithm can use the current energy as a state which already is a good estimate for future consumption. This technique called "Sliding window approach" is explained and analysed in detail in \cite{vafaeipour2014application}.\\
 This maximisation of input could be further improved by also including some reasonable knowledge about the future. Weather forecast with a lookahead of one single day is quite reliable and could be used to further improve the algorithm. This however would also mean that the recorded weather forecast would be needed for training. This at the moment is not the case.\\
-The three possible configuration of input and output as described above are depicted in figure \ref{fig:timeshift}
+The three possible configuration of input and output as described above are depicted in figure \ref{fig:timeshift}.
 
 %TIMESHIFT
 \begin{figure}[!t] 
 \centering 
 \includegraphics[width=0.45\textwidth]{LA-regpred.png} 
-\caption{Input(green) and output (red) of time shifted data for prediction.} 
+\caption{Input(green) and output (red) frames for prediction (left), sliding window (middle) and prediction enhanced (yellow) sliding window (right).} 
 \label{fig:timeshift} 
 \end{figure}
 
 \subsection{Sampling}
-%input frame, features and sampling rate
-%output frame, features and sampling rate
 For simplicity and the algorithm to perform in reasonable time, the maximum sampling rate of one minute was not used. Instead the input frame was sub sampled to 20 minutes. With 9 input dimensions this makes a total of 657 dimensions at the input.\\
-On the output, the daily energy consumption naturally is only one value. However the sampling rate of 20 minutes at the input also defines the number of samples we have in total and per day. Thus every daily energy consumption is defined by 72 samples and the total of 242 days is sampled 17424 times.
-%TODO implications on tree depth, sampling and so on
+On the output, the daily energy consumption naturally is only one value. However the sampling rate of 20 minutes at the input also defines the number of samples we have in total and per day. Thus every daily energy consumption is defined by 72 samples and the total of 242 days is sampled 17424 times. Those samples in the end where split into a training set and a test set which contained the last 10 days of recording.
 
-%TODO Split of train/test data
 
 \section{Algorithm}
-%Selection choice
 As stated in section \ref{sec:GARF}, an evolutionary strategy was chosen over a genetic algorithm. In this section I discuss the basic workings and design choices of the evolutionary strategy used. Besides the discussion of the genome, the mutation and selection and the fitness value in the following paragraphs it is necessary to point out that the algorithm used elitism on the best individual and limited the maximum tree depth for mutation to 30. This allows for maximum tree depth of 60, if a complete tree of depth 30 is crossed over with a leaf of another tree that also has a tree depth of 30. This tree however can not crossover any more.
-This puts a theoretical limit of $2^{30}$ leaf values and $2^{30} - 2^{29}$ splits which in practice is not a limit in this problem.
-%Elitism
-%Tree depth
-%
+This puts a theoretical limit of $2^{30}$ leaf values and $2^{30} - 2^{29}$ splits which in practice is not a limit in this problem.\\
 
 \subsection{Genome}
-%decision tree
 The genome of the evolutionary algorithm is the decision tree itself.
-%node
 On a node position, it contains a dimension along which it splits, and a split value between zero and one which defines how to split the input. The split itself is defined as a $\leq$ relation which allows zero values as splits. 
-%leaf
 At the leafs, there also is a prediction value between zero and one. The structure of the tree is defined as a data structure and can not be mutated but only changed by crossover. The limits between one and zero only apply because of the normalization of the data in the preprocessing step.
-%genetic programming
 This structure can be thought of as an explicit genetic program that is evolved. Explicit because it is not compiled but executed as functions. It also is not a full power genetic program, because it only contains the $\leq$ operation for the splits and only values as outputs. Without higher level functions that actually work on the inputs, this is only similar to genetic programming. However the implication of tree depth, balancedness, node and leaf mutation and possible crossover method also apply.
 
 \subsection{Fitness}
-%mse to real values
 As with every evolutionary algorithm, a fitness function has to be defined. For predictions, the mean squared error (MSE) between the predicted and the actual value is a natural choice. \\
-%random subsampling
 In this particular application, the MSE was not calculated after every algorithm iteration, based on a random sub sample of $ n $input out pairs. The inputs of all $n$ samples where propagated through the nodes of the decision tree, and the difference between the predictions and the actual energy consumption was assigned to the tree as a fitness that was to minimize. This random  sub sampling results in an unstable fitness value which then possibly leads to an unstable order if individuals in the population. This may enhance diversity of the population but also puts a lower bound on the minimum that can be reached. This can never be lower then the variance of the random sub samples, because inside this variance a good fit is by chance and will not survive multiple fitness evaluations.
-%sampling and its impact
-%instable mse
 
 \subsection{Mutation}
 The mutation of the decision tree are likely to greatly influence the outcome. Thus the prediction value is only initially randomly chosen from the input space. Afterwards, the split values as well as the prediction values are mutated with a value drawn from a Gaussian distribution. The Mean for the distribution is the value before mutation. A Sigma defines the standard deviation from that value. Since all values are normalized between zero and one, the same Sigma is used for all mutation, be it leafs or nodes. For the same reason, values beyond zero or one are cut off. The sigma is fixed for the whole run and was not changed. Thus a mutation changes, dependent on the position it happens either the split value (nodes) or the prediction value (leafs) with a Gaussian distribution.
-%KISS
-%gaussian mutation with one sigma
-%node: shift split
-%leaft: change prediction
 
 \subsection{Selection and recombination}
 The selection is based on the fitness values of the individual decision trees in the population. The best fitness is carried over into the iteration without modification (Elitism).\\
 The recombination and the amount of individuals can be chosen freely from the complete set of $(\mu ,\lambda)$, and $(\mu + \lambda)$ Evolutionary strategies as defined in \cite{rozenberg2011handbook}. In the current implementation, limits are put upon the choice by the number of the total population size. The population size and the number of random samples for the fitness function are the scaling factors for the memory usage. 
-%free selection choice
-%, does not go well
-%at least two stable members
-%memory use is scaling with pop size and sampling rate
 
 
 \section{Analysis}
@@ -319,6 +261,8 @@ It was not possible to test all combinations of all parameters and thus I decide
 Of those parameters, two groups with similar context where formed. 
 The number of iterations, the selection type and the mutation variance all are parameters mostly independent from the problem, where the mutation probabilities, the initial tree depth  and the number of samples are directly linked to the solution quality. The parameters of the other set where kept static with an expected good value. Thus I had two runs which where used to evaluate the parameters:
 
+\begin{enumerate}
+\item 
 \begin{itemize}
 \item Iterations to run = [100, 200, 400]
 \item Selection type = ['2+2',  '4+16', '4+32', '4,16']
@@ -328,8 +272,10 @@ The number of iterations, the selection type and the mutation variance all are p
 \item Node mutation probability = [0.8]
 \item Fitness samples = [500]
 \end{itemize}
-With a total of 60 runs. And
 
+With a total of 60 runs.\\
+
+\item
 \begin{itemize}
 \item Iterations to run = [200]
 \item Selection type = ['4+16']
@@ -340,26 +286,26 @@ With a total of 60 runs. And
 \item Fitness samples = [100, 500, 1000]
 \end{itemize}
 With a total of 69 runs.\\
-For every run, the progress of the minimal, maximal and mean fitness value was recorded and plotted. Additionally, at the end of the run, the best individual was presented an input training set of the last 10 days of the recordings. That formerly unseen input sample then was feed to the fitness function to compute the mean squared error to the actual energy consumption. The prediction along with the actual values also where plotted. All parameters, the minimal fitness value and the MSE of the train set where recorded to evaluate the parameters.
+\end{enumerate}
+For every run, the progress of the minimal, maximal and mean fitness value was recorded and plotted. Additionally, at the end of the run, the best individual was presented an input training set of the last 10 days of the recordings. (See figure \ref{fig:winner} and figure \ref{fig:best}) That formerly unseen input sample then was feed to the fitness function to compute the mean squared error to the actual energy consumption. The prediction along with the actual values also where plotted. All parameters, the minimal fitness value and the MSE of the train set where recorded to evaluate the parameters.
 
-%list of all parameters
-%two standard sets
-%some less likely parameters
-%scaling of parameters with performance
 
 \subsection{Algorithm behaviour}
 From the recorded fitness progress, the fit from the training set and the recordings of the parameters, I could gain insight in the algorithm behaviour in general and with respect to the parameters.\\
-In general, the algorithm quickly (often within the first 20 iterations) found a local optima. In some cases, one or two additional local minima where found. Those improvements usually where instant and where not incrementally improved. Besides the use of elitism, the minimal fitness was unstable because of the random sub sampling. The gap between the minimal and maximal fitness, which indicated diversity in the population usually is very small or not present at all. In a few cases, the population temporarily gained a diversity boost, indicated by a sudden split of min, mean and max fitness. This however was not reproducible with the same parameters and thus random. In addition, no positive or negative effect on the final fitness value could be measured. All in all, the optimization was not stable.\\
+In general, the algorithm quickly (often within the first 20 iterations) found a local optima. In some cases, one or two additional local minima where found. Those improvements usually where instant and where not incrementally improved. Besides the use of elitism, the minimal fitness was unstable because of the random sub sampling. The gap between the minimal and maximal fitness, which indicated diversity in the population usually is very small or not present at all. In a few cases, the population temporarily gained a diversity boost, indicated by a sudden split of minimal, mean and maximal fitness. This however was not reproducible with the same parameters and thus random. In addition, no positive or negative effect on the final fitness value could be measured. All in all, the optimization was not stable.\\
 With respect to the parameters, the visual examination of the fitness progress led no clear picture. Neither did the prediction of the test set. Neither the absolute predicted values, not their position of change gave any indication of a successful learned concept. The values where mostly within the middle range where the measured energy consumption lied. The changes of values did not match the daily change of the energy value. Additionally, the different prediction values also varied highly. In most of the more successful runs, there was only one prediction value which roughly corresponded to the mean. But there also where a lot of runs with more than 10 values that did neither relate to the trend of energy consumption nor the fixed time frame, where the energy consumption changed every day.
 
+\subsection{Parameter correlation}
+To validate the weak visual indications, the correlation of the parameters and the fitness value was calculated. As depicted in figure \ref{fig:param_correlation}, the correlation of the parameters with the fitness is almost zero. One exception is the selection type, because a $(\mu,\lambda)$ selection with a low population size (below 30) is not able to sustain a stable solution and thus randomly loses good solutions and often got thrown back to the initial random initialisation. Other than that, this means, that this particular algorithm can not be optimized by the choice of parameters on this concrete problem. Thus the choice of parameters could not systematically be improved. More runs with less likely and computationally more expensive parameters also ended without success.
 
-%one or two local minima
-%no steady improvement
-%mayor problem, thus more testruns
-%propaly the insteady fitness
+%PARAM CORRELATION
+\begin{figure}[!t] 
+\centering 
+\includegraphics[width=0.45\textwidth]{paramruns_corellation.png} 
+\caption{Parameter correlation.} 
+\label{fig:param_correlation} 
+\end{figure}
 
-\subsection{Correlation}
-To validate the weak visual indications, the correlation of the parameters and the fitness value was calculated. As depicted in figure \ref{fig:param_correlation}, the correlation of the parameters with the fitness is almost zero. One exception is the selection type, because a $(\mu,\lambda)$ selection with a low population size (below 30) is not able to sustain a stable solution and thus randomly loses good solutions and often got thrown back to the initial random initialisation. Other than that, this means, that this particular algorithm can not be optimized by the choice of parameters on this concrete problem. Thus the choice of parameters could not systematically be improved. More runs with less likely and computationally more expensive parameters also ended without success.\\
 
 \subsection{Fitness and prediction}
 \label{sec:fitness_prediction}
@@ -375,21 +321,9 @@ This clearly is by no means acceptable for an optimization algorithm and thus wa
 \label{fig:mse_comparison} 
 \end{figure}
 
-%PARAM CORRELATION
-\begin{figure}[!t] 
-\centering 
-\includegraphics[width=0.45\textwidth]{paramruns_corellation.png} 
-\caption{Parameter correlation.} 
-\label{fig:param_correlation} 
-\end{figure}
-%which parameter impacted toe fitness
-%bad sumsampling
-
-%predicted MSE vs. fitness
-
 \subsection{Result}
 As described in section \ref{sec:fitness_prediction}, the optimization was neither stable nor the result of steady improvement. Thus it is not of relevance, which result was the best, because it can not reliably be reproduced. I however will use the example of the best fitness value (see figure \ref{fig:winner}) and the best prediction (see figure \ref{fig:best}) to point the weaknesses of the algorithm.\\
-The fitness progress of the individual with the best fitness is not typical. We see a gradual decrease of the fitness between the 25th and 50th iteration. In most of the other runs, this optimization happens in one step. What is typical here, is the high fluctuation in the fitness value. Besides the use of elitism, the fitness value for almost half the size of the first significant optimization step. This also makes clear that an optimization to be visible has to be greater than this fluctuation and a stable improvement inside this fluctuation is likely to be reverted later. It is also typical that the three recorded fitness values (maximum in red, mean in blue and minimum in blue) often are the same, which means that all individuals predicted the same. This however does not mean they are the same. The prediction of the best fitness is representative for a good portion of the results. The predicted value is at no time close to the actual energy value and the changes in value do not align with the change of the day every 72nd 20th minute (the x scale). It also does not reflect the fitness value and thus can not be justified to be more than random with a little luck.\\
+The fitness progress of the individual with the best fitness is not typical. We see a gradual decrease of the fitness between the 25th and 50th iteration. In most of the other runs, this optimization happens in one step. What is typical here, is the high fluctuation in the fitness value. Besides the use of elitism, the fitness value for almost half the size of the first significant optimization step. This also makes clear that an optimization to be visible has to be greater than this fluctuation and a stable improvement inside this fluctuation is likely to be reverted later. It is also typical that the three recorded fitness values (maximum in red, mean in blue and minimum in blue) often are the same, which means that all individuals predicted the same. This however does not mean they are the same. The prediction of the best fitness is representative for a good portion of the results. The predicted value is at no time close to the actual energy value and the changes in value do not align with the change of the day every 72nd 20th minute (scale on the x axis). It also does not reflect the fitness value and thus can not be justified to be more than random with a little luck.\\
 On the other hand, we have the individual which did the best estimate of the prediction. It also performed bad with its actual fitness value in comparison to the other runs, but it was nonetheless the best individual of its run. The prediction is also representative. A large portion of predictions just where one single line. Either because the decision tree only was one leaf or because the splits learned left out only one value for the whole range of input data. It closely assembles the actual energy consumption but is not a useful prediction because it does not consider the input.\\
 The fitness progress again is interesting. It was one of only a few runs, where the population over several iterations split off into different but somewhat stable solutions. The population diverged quickly and was stayed that way even if a clear winner is visible. Only after some more iterations the population again collapses to similar individuals and stayed that way up until the end.
 
@@ -399,7 +333,7 @@ The fitness progress again is interesting. It was one of only a few runs, where 
 \centerline{\subfloat[Fitness progress of the lowest final MSE 0.0277.]{\includegraphics[width=2.5in]{0p0277-2p2.png}%
 \label{fig:winner_fitness}}
 \hfil
-\subfloat[Prediction of the lowest MSE with an actual MSE of 0.0568.]{\includegraphics[width=2.5in]{best-0p0277=0p05678-2+2.png}%
+\subfloat[Prediction of the last 10 days with a date frequency of 20 minutes with the lowest final MSE with a predictive MSE of 0.0568.]{\includegraphics[width=2.5in]{best-0p0277=0p05678-2+2.png}%
 \label{fig:winner_prediction}}}
 \caption{Analysis of the lowest final MSE of all runs.}
 \label{fig:winner}
@@ -408,12 +342,12 @@ The fitness progress again is interesting. It was one of only a few runs, where 
 
 %BEST
 \begin{figure*}[!t]
-\centerline{\subfloat[Fitness progress of the lowest final MSE 0.0537.]{\includegraphics[width=2.5in]{0p0537-2+2.png}%
+\centerline{\subfloat[Fitness progress of the lowest prediction MSE of 0.0019.]{\includegraphics[width=2.5in]{0p0537-2+2.png}%
 \label{fig:best_fitness}}
 \hfil
-\subfloat[Prediction of the lowest MSE with an actual MSE of 0.0019.]{\includegraphics[width=2.5in]{best-0p05374=0p0019-2+2.png}%
+\subfloat[Prediction of the last 10 days with a date frequency of 20 minutes with the lowest prediction MSE and an final MSE of 0.05374.]{\includegraphics[width=2.5in]{best-0p05374=0p0019-2+2.png}%
 \label{fig:best_prediction}}}
-\caption{Analysis of the lowest predicted MSE of all runs.}
+\caption{Analysis of the lowest prediction MSE of all runs.}
 \label{fig:best}
 \end{figure*}
 
@@ -424,19 +358,9 @@ As stated at the beginning, the project was aimed to improve a random forest pre
 \begin{figure}[!t] 
 \centering 
 \includegraphics[width=0.45\textwidth]{LA-predict-energy--0p890.png} 
-\caption{Prediction of the Random Forest.} 
+\caption{Prediction of the energy consumption (y - axis) of the last eight days of the dataset in steps of 10 minutes (x-axis) with a Random Forest.} 
 \label{fig:random_forest} 
 \end{figure}
-
-
-
-
-%not fruitful
-%however, here is the full random forest
-%comparison not fair:
-%decision trees are by definition weaker then random forests
-%other datasets and problems(regression) showed same behaviour
-
 
 \section{Conclusion}
 AS discussed in detail, the presented implementation of the algorithm is not able to significantly improve a random decision tree to predict the energy consumption from a high dimensional input. This inability is independent from the parameters which where tested on a comprehensive set of values. Single runs produced a reasonably good prediction, but no indication for a better then random result could be found.
@@ -467,89 +391,13 @@ With these improvements it would also be possible to advance further on the conc
 \item Compare the performance in detail with other prediction algorithms.
 \end{itemize}
 
-%TODO: reformulate this
-%To end with a good note, it could be demonstrated how to 
-%find out how bad it actually is with statsistic
+To end on a positive note, it was demonstrated how careful statistical analysis of different runs with different parameters should lead the way to insights on the performance of the algorithm and the parameters. Visual scans of progress plots and prediction result can and often will be led by expectations and distorted by the confirmation bias.
 
-
-
-%not useful
-%does not scale
-%MSE has to be more stable
-
-%improvement suggestions:
-%more performant algorithms
-%Other crossover methods
-%As GP: more functions then <=
-%evolve a forest instead of a tree
-%include weather forecast
-%personal note: I learned a lot.
-
-
-
-
-
-% An example of a floating table. Note that, for IEEE style tables, the 
-% \caption command should come BEFORE the table. Table text will default to
-% \footnotesize as IEEE normally uses this smaller font for tables.
-% The \label must come after \caption as always.
-%
-%\begin{table}[!t]
-%% increase table row spacing, adjust to taste
-%\renewcommand{\arraystretch}{1.3}
-% if using array.sty, it might be a good idea to tweak the value of
-% \extrarowheight as needed to properly center the text within the cells
-%\caption{An Example of a Table}
-%\label{table_example}
-%\centering
-%% Some packages, such as MDW tools, offer better commands for making tables
-%% than the plain LaTeX2e tabular which is used here.
-%\begin{tabular}{|c||c|}
-%\hline
-%One & Two\\
-%\hline
-%Three & Four\\
-%\hline
-%\end{tabular}
-%\end{table}
-
-
-
-% trigger a \newpage just before the given reference
-% number - used to balance the columns on the last page
-% adjust value as needed - may need to be readjusted if
-% the document is modified later
-%\IEEEtriggeratref{8}
-% The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
-
-% references section
-
-%TODO include bib
-% can use a bibliography generated by BibTeX as a .bbl file
-% BibTeX documentation can be easily obtained at:
-% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
-% The IEEEtran BibTeX style support page is at:
-% http://www.michaelshell.org/tex/ieeetran/bibtex/
 \bibliographystyle{IEEEtran}
-% argument is your BibTeX string definitions and bibliography database(s)
-\bibliography{IEEEabrv,bib}
-%
-% <OR> manually copy in the resultant .bbl file
-% set second argument of \begin to the number of references
-% (used to reserve space for the reference number labels box)
-%\begin{thebibliography}{1}
+\bibliography{bib}
 
-%\bibitem{IEEEhowto:kopka}
-%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-%  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+% \bibliography{IEEEabrv, bib.bib}
 
-%\end{thebibliography}
-
-
-
-
-% that's all folks
 \end{document}
 
 
